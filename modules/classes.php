@@ -13,11 +13,11 @@ return [
 			'reg' => function ($matches) {
 				switch ($matches[2]) {
 					case '__vnames':
-						return 'array_keys(get_class_vars(\'' . $matches[1] . '\'))';
+						return "array_keys(get_class_vars('$matches[1]'))";
 						break;
 
 					case '__vars':
-						return 'get_class_vars(\'' . $matches[1] . '\')';
+						return "get_class_vars('$matches[1]')";
 						break;
 					
 					default:
