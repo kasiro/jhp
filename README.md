@@ -101,45 +101,6 @@ class Main {
 }
 ```
 
-### Если кому Привычее js  то пожалуйста (Модуль: js_object):
-```php
-new MyClass({});
-// В Обьявлениях Класса тоже можно, Но можно и как в php, Работает и так и так
-new MyClass({
-	'name': explode('.', basename(__FILE__))[0],
-	'data': {
-		'name': 'ivan',
-		'surname': 'grozniy',
-		'desc': 'grozniy',
-		'myid': 'ivan_id'
-	}
-});
-// Все присвоения переменной с { => [, : -> =>
-$var = {
-	'name': explode('.', basename(__FILE__))[0],
-	'data': {
-		'name': 'ivan',
-		'surname': 'grozniy',
-		'desc': 'grozniy',
-		'myid': 'ivan_id'
-	}
-};
-// без присвоения лучше так
-$this->duplicateTag(tag: $tag, [
-    // В таких случаях можно так
-	'has': {
-		'el'
-	}
-]);
-// без присвоения лучше так
-return my_func(tag: $tag, [
-	'has': {
-		'el'
-	}
-]);
-return myfunc($array  = {});
-```
-
 ### Модуль catch:
 #### (\Throwable) Можно настроить в модуле что тут будет юзаться по умолчанию
 ```php
@@ -175,13 +136,6 @@ ClassName::__vars() -> array_keys(get_class_vars('ClassName'))
 ### Модуль global:
 ```php
 <g $var, $vars> -> global $var, $vars;
-```
-
-### Модуль array_els:
-```php
-// не работает в if ( $array>main )
-$array>main -> $array['main']
-$array>$main -> $array[$main]
 ```
 
 ## Конфиг: jhp.config
