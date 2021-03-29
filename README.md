@@ -131,6 +131,7 @@ $mainString = @$var ? $var : (
 ### Модуль classes:
 ```php
 ClassName::__vnames() -> array_keys(get_class_vars('ClassName'))
+ClassName::__vars() -> get_class_vars('ClassName')
 ```
 
 ### Модуль global:
