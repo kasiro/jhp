@@ -32,7 +32,7 @@ class module_loader {
 		if ($module_list) {
 			$files = glob($path_modules . '/*.php');
 			foreach ($files as $path){
-				$module_name = explode('.', explode('/', $path)[1])[0];
+				$module_name = explode('.', @end(explode('/', $path)))[0];
 				// echo $module_name . "\n";
 				$current_module = require $path;
 				if ($current_module['settings']['use'] === true && in_array($module_name, $module_list)){
@@ -55,8 +55,7 @@ class module_loader {
 		} else {
 			$files = glob($path_modules . '/*.php');
 			foreach ($files as $path){
-				$module_name = explode('.', explode('/', $path)[1])[0];
-				// echo $module_name . "\n";
+				$module_name = explode('.', @end(explode('/', $path)))[0];
 				$current_module = require $path;
 				if ($current_module['settings']['use'] === true){
 					foreach ($current_module['settings'] as $key => $value){
