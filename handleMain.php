@@ -136,10 +136,11 @@ class MyPHP {
 			$dirname = dirname($file);
 			$basename = basename($file);
 			$reg_list = $this->module_loader->getAllRules();
-			if (file_exists($file))
+			if (file_exists($file)){
 				$code = file_get_contents($file);
-			else
-				$code = '';
+				$code = str_replace('    ', "\t", $code);
+				file_put_contents($file, $code);
+			} else $code = '';
 			if ($code) {
 				$code = $this->RunRender($reg_list, $code);
 				$has_error = $this->hasErrorText($code);
