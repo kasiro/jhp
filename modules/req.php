@@ -41,28 +41,6 @@ return [
 					return $throw_text($path);
 			}
 		],
-		'/import\(\'(.*)\'\);/m' => [
-			'type' => 'call',
-			'reg' => function ($matches) use ($throw_text) {
-				$module_name = $matches[1];
-				$path = import($module_name);
-				if ($path != "module $module_name not found")
-					return "require('$path');";
-				else
-					return $throw_text($path);
-			}
-		],
-		'/import\(\"(.*)\"\);/m' => [
-			'type' => 'call',
-			'reg' => function ($matches) use ($throw_text) {
-				$module_name = $matches[1];
-				$path = import($module_name);
-				if ($path != "module $module_name not found")
-					return "require(\"$path\");";
-				else
-					return $throw_text($path);
-			}
-		],
 		'/import_once \'(.*)\';/m' => [
 			'type' => 'call',
 			'reg' => function ($matches) use ($throw_text) {
@@ -81,28 +59,6 @@ return [
 				$path = import($module_name);
 				if ($path != "module $module_name not found")
 					return "require_once \"$path\";";
-				else
-					return $throw_text($path);
-			}
-		],
-		'/import_once\(\'(.*)\'\);/m' => [
-			'type' => 'call',
-			'reg' => function ($matches) use ($throw_text) {
-				$module_name = $matches[1];
-				$path = import($module_name);
-				if ($path != "module $module_name not found")
-					return "require_once('$path');";
-				else
-					return $throw_text($path);
-			}
-		],
-		'/import_once\(\"(.*)\"\);/m' => [
-			'type' => 'call',
-			'reg' => function ($matches) use ($throw_text) {
-				$module_name = $matches[1];
-				$path = import($module_name);
-				if ($path != "module $module_name not found")
-					return "require_once(\"$path\");";
 				else
 					return $throw_text($path);
 			}
