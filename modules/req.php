@@ -1,7 +1,13 @@
 <?php
 
 if (!function_exists('import')) {
-	function import($path){
+	/**
+	 * my req function
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	function import(string $path){
 		$mp = '/home/kasiro/Документы/projects/mphp/file_req';
 		if (file_exists("$mp/{$path}.php")) {
 			return "$mp/{$path}.php";
