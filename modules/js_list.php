@@ -6,13 +6,13 @@ $settings = [
 return [
 	'settings' => $settings,
 	'rules' => [
-		'/(var|let) \{(.*)\} = (.*)/m' => [
+		'/(var|let) \{((?:(?(R).*|[^}]*+)|(?R))*)\} = (.*)/m' => [
 			'type' => 'string',
 			'reg' => 'list($2) = $3',
 			'do' => [],
 			'then' => []
 		],
-		'/(var|let) \[(.*)\] = (.*)/m' => [
+		'/(var|let) \[((?:(?(R).*|[^]]*+)|(?R))*)\] = (.*)/m' => [
 			'type' => 'string',
 			'reg' => 'list($2) = $3',
 			'do' => [],
