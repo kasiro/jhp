@@ -147,4 +147,4 @@ ClassName::__vars() -> get_class_vars('ClassName')
 ### Стандартные Алиасы
 jhp  | php
 ------------- | -------------
-__con()  | __construct()
+__con  | __construct
