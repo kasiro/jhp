@@ -56,10 +56,10 @@ if (!function_exists('import_array')) {
 		eval('$files'." = [$path];");
 		foreach ($files as $file){
 			if (!is_string($file)) {
-				$throw_text('import_array el is not STRING');
+				throw new Exception('[jhp: 404] import_array el is not STRING');
 			}
+			yield $file;
 		}
-		return $files;
 	}
 }
 $settings = [
