@@ -95,6 +95,11 @@ class module_loader {
 class MyPHP {
 	public $conf_path;
 	public function __construct($file) {
+		$GLOBALS['fileinfo'] = [
+			'full' => $file,
+			'dirname' => dirname($file),
+			'basename' => basename($file),
+		];
 		// echo 'Config finded: ' . ($this->findConfig($file) ? 'true' : 'false') . "\n";
 		getConfig:
 		if ($this->findConfig($file)) {
