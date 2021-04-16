@@ -1,5 +1,9 @@
 <?php
 
+$throw_text = function ($path){
+	return "throw new Exception('[jhp: 404] $path');";
+};
+
 define('FILE_REQ', '/home/kasiro/Документы/projects/mphp/file_req');
 function myrglob($base, $pattern, $flags = 0) {
 	if (substr($base, -1) !== DIRECTORY_SEPARATOR) {
@@ -50,12 +54,14 @@ if (!function_exists('import_array')) {
 	 */
 	function import_array(string $path){
 		eval('$files'." = [$path];");
+		foreach ($files as $file){
+			if (!is_string($file)) {
+				$throw_text('import_array el is not STRING');
+			}
+		}
 		return $files;
 	}
 }
-$throw_text = function ($path){
-	return "throw new Exception('[jhp: 404] $path');";
-};
 $settings = [
 	'use' => true
 ];

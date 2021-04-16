@@ -6,7 +6,7 @@ $settings = [
 return [
 	'settings' => $settings,
 	'rules' => [
-		'/jscandir\((.*)\)/m' => [
+		'/<j>scandir\((.*)\)/m' => [
 			'type' => 'string',
 			'reg' => "array_diff(scandir($1), ['.', '..'])",
 		],
