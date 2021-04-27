@@ -95,7 +95,7 @@ return [
 				return $s;
 			}
 		],
-		'/(.*)import: include \'(.*)\';/m' => [
+		'#(.*)import: include \'(.*)\';#m' => [
 			'type' => 'call',
 			'reg' => function ($matches) use ($throw_text) {
 				$tabs = $matches[1];
@@ -115,7 +115,7 @@ return [
 				return $s;
 			}
 		],
-		'/(.*)import_array \[(.*)\];/ms' => [
+		'#(.*)import_array \[(.*)\];#ms' => [
 			'type' => 'call',
 			'reg' => function ($matches) use ($throw_text) {
 				$tabs = $matches[1];
