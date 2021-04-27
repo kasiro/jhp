@@ -63,7 +63,8 @@ if (!function_exists('import_array')) {
 	}
 }
 $settings = [
-	'use' => true
+	'use' => true,
+	'fullpath' => true
 ];
 return [
 	'settings' => $settings,
@@ -114,7 +115,7 @@ return [
 				return $s;
 			}
 		],
-		'/(.*)import_array \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m' => [
+		'/(.*)import_array \[(.*)\];/ms' => [
 			'type' => 'call',
 			'reg' => function ($matches) use ($throw_text) {
 				$tabs = $matches[1];
@@ -146,9 +147,9 @@ return [
 				return $s;
 			}
 		],
-		'/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m' => [
+		'/(.*)import_array: include \[(.*)\];/ms' => [
 			'type' => 'call',
-			'reg' => function ($matches) use ($throw_text) {
+			'reg' => function ($matches) use ($throw_text, $settings) {
 				$i = 0;
 				restart:
 				$tabs = $matches[1];
@@ -198,7 +199,13 @@ return [
 						scandir($modules_path),
 						['.', '..']
 					);
-
+				}
+				foreach ($m as $new_module){
+					if (!in_array($new_module, $mbs)) {
+						unlink($modules_path.'/'.$new_module);
+					}
+				}
+				foreach ($modules as $module){
 					if (!file_exists($modules_path.'/'.basename($module))) {
 						copy($module, $modules_path.'/'.basename($module));
 					}
@@ -210,7 +217,9 @@ return [
 				$s = str_replace("\n", '', $s);
 				$s = str_replace(';require', ";\nrequire", $s);
 				$s = str_replace(';throw', ";\nthrow", $s);
-				$s = str_replace($dirname, '.', $s);
+				if (!$settings['fullpath']) {
+					$s = str_replace($dirname, '.', $s);
+				}
 				return $s;
 			}
 		],
