@@ -2,7 +2,7 @@
 
 class jModule {
 	public $settings = [];
-	protected $name = '';
+	protected $name;
 	public $regList = [];
 
 	public function setName(string $name){
