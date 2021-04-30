@@ -21,14 +21,10 @@ class jModule {
 	}
 
 	public function addreg(string $reg, string|callable $action){
-		if (is_string($action) || is_callable($action)) {
-			if (!isset($this->regList[$reg])) {
-				$this->regList[$reg] = $action;
-			} else {
-				throw new Exception('regexp is aelredy in $regList');
-			}	
-		} else {
-			throw new Exception('regexp is not NEED TYPE (jModule)');
+		if (!isset($this->regList[$reg])) {
+			$this->regList[$reg] = $action;
+			return;
 		}
+		throw new Exception('regexp is aelredy in $regList');
 	}
 }
