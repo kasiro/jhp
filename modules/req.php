@@ -4,7 +4,7 @@ $throw_text = function ($path){
 	return "throw new Exception('[jhp: 404] $path');";
 };
 
-define('FILE_REQ', '/home/kasiro/Документы/projects/mphp/file_req');
+define('FILE_REQ', '/home/kasiro/Документы/projects/mphp/user_modules');
 function myrglob($base, $pattern, $flags = 0) {
 	if (substr($base, -1) !== DIRECTORY_SEPARATOR) {
 		$base .= DIRECTORY_SEPARATOR;
