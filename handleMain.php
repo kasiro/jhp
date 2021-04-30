@@ -18,7 +18,7 @@ class module_loader {
 		$list = [];
 		$files = glob($this->path_modules . '/*.php');
 		foreach ($files as $path){
-			$fname = @end(explode('/', $path));
+			$fname = basename($path);
 			$module_name = explode('.', $fname)[0];
 			$current_module = require $path;
 			if ($current_module['settings']['use'] === true) {
