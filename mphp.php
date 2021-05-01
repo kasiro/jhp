@@ -18,8 +18,7 @@ class module_loader {
 
 	public function get_module_list(){
 		foreach ($this->getModules() as $path){
-			$fname = basename($path);
-			$module_name = explode('.', $fname)[0];
+			$module_name = explode('.', basename($path))[0];
 			$current_module = require $path;
 			if ($current_module->getSettings()['use'] === true) {
 				yield $module_name;
@@ -35,6 +34,40 @@ class module_loader {
 		}
 	}
 }
+class Config {
+
+	public static function find($file_path){
+		$arr = explode('/', dirname($file_path));
+		$cur_dir_up = '';
+		for ($i = 0; $i < count($arr); $i++){
+			$cur_dir_up .= $i == 0 ? $arr[$i] : '/' . $arr[$i];
+			$files = glob($cur_dir_up . '/*.config');
+			if (count($files) > 0) {
+				foreach ($files as $file){
+					if (basename($file) == 'jhp.config') {
+						return $file;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	public static function create_start_config($module_list){
+		$config = [
+			'modules' => [],
+			'aliases' => [
+				'__con' => '__construct'
+			]
+		];
+		$this->conf_path;
+		foreach ($module_list as $module_name){
+			$config['modules'][] = $module_name;
+		}
+		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+		$j = str_replace('    ', "\t", $j);
+		file_put_contents($this->conf_path, $j);
+	}
+}
 class MyPHP {
 	private $conf_path;
 	
@@ -45,9 +78,16 @@ class MyPHP {
 	}
 
 	function __construct(string $path){
-		$this->isJhp($path); 
+		$this->isJhp($path);
 		$this->setGlobalPath($path);
 		$this->module_loader = new module_loader(__DIR__.'/modules/*.php');
+		if ($conf_path = Config::find($path)) {
+			echo $conf_path . PHP_EOL;
+			$this->conf_path = $conf_path;
+			$this->create_start_config();
+		} else {
+			echo 'Конфиг не найден' . PHP_EOL;
+		}
 		$this->renderCode();
 	}
 
@@ -55,7 +95,7 @@ class MyPHP {
 		$GLOBALS['fileinfo']['full'] = $path;
 		$GLOBALS['fileinfo']['dirname'] = dirname($path);
 		$GLOBALS['fileinfo']['basename'] = basename($path);
-		$newpath = preg_replace("#\.[\w\d]+$#i", ".php", basename($path));
+		$newpath = preg_replace('#\.[\w\d]+$#i', '.php', basename($path));
 		$GLOBALS['fileinfo']['savefull'] = dirname($path).'/'.$newpath;
 	}
 
@@ -65,7 +105,7 @@ class MyPHP {
 	 * @return void
 	 */
 	public function update_modules_config(){
-		# code...
+		
 	}
 
 	public function transform($module, $code){
@@ -107,8 +147,9 @@ class MyPHP {
 			// 	echo explode('.', basename($file))[0] . PHP_EOL;
 			// }
 			$module = require $file;
-			if ($module->getSettings()['use'] === false) continue;
-			$code = $this->transform($module, $code);
+			if ($module->getSettings()['use'] === true){
+				$code = $this->transform($module, $code);
+			}
 		}
 		file_put_contents($GLOBALS['fileinfo']['savefull'], $code);
 	}
@@ -120,8 +161,12 @@ class MyPHP {
 				'__con' => '__construct'
 			]
 		];
-		foreach  ($this->module_loader->get_module_list() as $module_name){
-			$config['modules'][] = $module_name;
+		foreach ($this->module_loader->getModules() as $path){
+			$module_name = explode('.', basename($path))[0];
+			$current_module = require $path;
+			$config['modules'][] = [
+				$module_name => $current_module->getSettings()
+			];
 		}
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		$j = str_replace('    ', "\t", $j);
@@ -129,5 +174,5 @@ class MyPHP {
 	}
 }
 
-$p = '/home/kasiro/Документы/php/pyTest/test.jhp';
+$p = '/home/kasiro/Документы/projects/testphp/test/main.jhp';
 $mphp = new MyPHP($p);
