@@ -2,7 +2,8 @@
 # 1 - Абсолютная проходимость - Абсолютная передача данных
 
 class module_loader {
-	private $path_mods; 
+	public $path_mods;
+	public $load_modules = [];
 
 	function __construct(string $path_mods){
 		require __DIR__.'/jModule.php';
@@ -14,6 +15,15 @@ class module_loader {
 		foreach ($files as $file){
 			yield $file;
 		}
+	}
+
+	/**
+	 * update_modules_config Modules Settings
+	 *
+	 * @return void
+	 */
+	public function update_modules_config($modules){
+		$this->load_modules = $modules;
 	}
 
 	public function get_module_list(){
@@ -69,7 +79,7 @@ class Config {
 	}
 }
 class MyPHP {
-	private $conf_path;
+	public $conf_path;
 	
 	public function isJhp($path) {
 		if (explode('.', basename($path))[1] !== 'jhp') {
@@ -84,7 +94,14 @@ class MyPHP {
 		if ($conf_path = Config::find($path)) {
 			echo $conf_path . PHP_EOL;
 			$this->conf_path = $conf_path;
-			$this->create_start_config();
+			$json = file_get_contents($this->conf_path);
+			if (strlen($json) == 0) {
+				$this->create_start_config();
+			} else {
+				// echo 'Обрабатываем данные конфига' . PHP_EOL;
+				$config = json_decode($json, true);
+				$this->module_loader->update_modules_config($config['modules']);
+			}
 		} else {
 			echo 'Конфиг не найден' . PHP_EOL;
 		}
@@ -97,15 +114,6 @@ class MyPHP {
 		$GLOBALS['fileinfo']['basename'] = basename($path);
 		$newpath = preg_replace('#\.[\w\d]+$#i', '.php', basename($path));
 		$GLOBALS['fileinfo']['savefull'] = dirname($path).'/'.$newpath;
-	}
-
-	/**
-	 * update_modules_config Modules Settings
-	 *
-	 * @return void
-	 */
-	public function update_modules_config(){
-		
 	}
 
 	public function transform($module, $code){
@@ -139,14 +147,28 @@ class MyPHP {
 	public function renderCode(){
 		$code = file_get_contents($GLOBALS['fileinfo']['full']);
 		foreach ($this->module_list() as $file){
-			// if (basename($file) == 'index.php') {
-			// 	echo 'load module: ';
-			// 	echo basename(dirname($file)) . PHP_EOL;
-			// } else {
-			// 	echo 'load module: ';
-			// 	echo explode('.', basename($file))[0] . PHP_EOL;
-			// }
 			$module = require $file;
+			if (basename($file) == 'index.php') {
+				// echo 'load module: ';
+				// echo basename(dirname($file)) . PHP_EOL;
+			} else {
+				// echo 'load module: ';
+				// echo explode('.', basename($file))[0] . PHP_EOL;
+				$cmn = explode('.', basename($file))[0];
+				if (count($this->module_loader->load_modules) > 0){
+					foreach ($this->module_loader->load_modules as $moule){
+						foreach ($moule as $name => $sets) {
+							if ($cmn = $name) {
+								if (!empty($sets)) {
+									$module->setSettings($sets);
+								} else {
+									throw new Exception("settings of module '$name' not be empty!");
+								}
+							}
+						}
+					}
+				}
+			}
 			if ($module->getSettings()['use'] === true){
 				$code = $this->transform($module, $code);
 			}
@@ -154,7 +176,7 @@ class MyPHP {
 		file_put_contents($GLOBALS['fileinfo']['savefull'], $code);
 	}
 
-	public function create_start_config(){
+	public function create_start_config($mode = 'all'){
 		$config = [
 			'modules' => [],
 			'aliases' => [
@@ -164,9 +186,18 @@ class MyPHP {
 		foreach ($this->module_loader->getModules() as $path){
 			$module_name = explode('.', basename($path))[0];
 			$current_module = require $path;
-			$config['modules'][] = [
-				$module_name => $current_module->getSettings()
-			];
+			$module_settings = $current_module->getSettings();
+			if ($mode == 'all') {
+				$config['modules'][] = [
+					$module_name => $module_settings
+				];	
+			} elseif ($mode == 'use'){
+				if ($module_settings['use']) {
+					$config['modules'][] = [
+						$module_name => $module_settings
+					];
+				}
+			}
 		}
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		$j = str_replace('    ', "\t", $j);
