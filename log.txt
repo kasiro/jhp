@@ -1,0 +1,10 @@
+[03.05.2021][17:58] file full path is 'test/main.jhp'
+[03.05.2021][17:58] file dirname path is 'test'
+[03.05.2021][17:58] file basename path is 'main.jhp'
+[03.05.2021][17:58] file savefull path is 'test/main.php'
+[03.05.2021][17:58] Обрабатываем данные конфига 'test/jhp.config'
+[03.05.2021][17:58] load module: 'echo_new_line'
+[03.05.2021][17:58] load module: 'fn'
+[03.05.2021][17:58] load module: 'this'
+[03.05.2021][17:58] load large module: 'import'
+

@@ -2,3 +2,4 @@
 
 nl 'hello';
 nl 'friend';
+$->howdy();

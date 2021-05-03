@@ -2,9 +2,9 @@
 
 $module = new jModule;
 $module->setSettings([
-	'use' => false
+	'use' => true
 ]);
 $n = explode('.', basename(__FILE__))[0];
 $module->setName($n);
-// $module->addreg();
+$module->addreg('/\$->/m', '$this->');
 return $module;

@@ -1,4 +1,5 @@
 <?php
 
-echo 'hello' . "\n";
-echo 'friend' . "\n";
+echo 'hello' . PHP_EOL;
+echo 'friend' . PHP_EOL;
+$this->howdy();

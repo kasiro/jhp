@@ -1,11 +1,13 @@
 <?php
 # 1 - Абсолютная проходимость - Абсолютная передача данных
+require(__DIR__.'/com/logger.php');
 
 class module_loader {
 	public $path_mods;
 	public $load_modules = [];
 
 	function __construct(string $path_mods){
+		$this->Logger = new Logger(__DIR__.'/log.txt');
 		require __DIR__.'/jModule.php';
 		$this->path_mods = $path_mods;
 	}
@@ -62,17 +64,32 @@ class Config {
 		}
 		return false;
 	}
-	public static function create_start_config($module_list){
+
+	public function create_start_config($mode = 'all'){
+		$this->Logger = new Logger(__DIR__.'/log.txt');
 		$config = [
 			'modules' => [],
 			'aliases' => [
 				'__con' => '__construct'
 			]
 		];
-		$this->conf_path;
-		foreach ($module_list as $module_name){
-			$config['modules'][] = $module_name;
+		foreach ($this->module_loader->getModules() as $path){
+			$module_name = explode('.', basename($path))[0];
+			$current_module = require $path;
+			$module_settings = $current_module->getSettings();
+			if ($mode == 'all') {
+				$config['modules'][] = [
+					$module_name => $module_settings
+				];
+			} elseif ($mode == 'use'){
+				if ($module_settings['use']) {
+					$config['modules'][] = [
+						$module_name => $module_settings
+					];
+				}
+			}
 		}
+		$this->Logger->add("create_start_config mode is '$mode'");
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		$j = str_replace('    ', "\t", $j);
 		file_put_contents($this->conf_path, $j);
@@ -88,21 +105,27 @@ class MyPHP {
 	}
 
 	function __construct(string $path){
+		if (!file_exists(__DIR__.'/user_modules')) mkdir(__DIR__.'/user_modules');
+		$this->Logger = new Logger(__DIR__.'/log.txt');
 		$this->isJhp($path);
 		$this->setGlobalPath($path);
 		$this->module_loader = new module_loader(__DIR__.'/modules/*.php');
 		if ($conf_path = Config::find($path)) {
-			echo $conf_path . PHP_EOL;
+			// echo $conf_path . PHP_EOL;
 			$this->conf_path = $conf_path;
 			$json = file_get_contents($this->conf_path);
 			if (strlen($json) == 0) {
-				$this->create_start_config();
+				echo 'Заполняем конфиг' . PHP_EOL;
+				if ($conf_path != './jhp.config') $this->Logger->add("Заполняем конфиг '$conf_path'");
+				Config::create_start_config();
 			} else {
-				// echo 'Обрабатываем данные конфига' . PHP_EOL;
+				if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
+				echo 'Обрабатываем данные конфига' . PHP_EOL;
 				$config = json_decode($json, true);
 				$this->module_loader->update_modules_config($config['modules']);
 			}
 		} else {
+			$this->Logger->add('Конфиг не найден');
 			echo 'Конфиг не найден' . PHP_EOL;
 		}
 		$this->renderCode();
@@ -114,6 +137,9 @@ class MyPHP {
 		$GLOBALS['fileinfo']['basename'] = basename($path);
 		$newpath = preg_replace('#\.[\w\d]+$#i', '.php', basename($path));
 		$GLOBALS['fileinfo']['savefull'] = dirname($path).'/'.$newpath;
+		foreach ($GLOBALS['fileinfo'] as $fname => $p){
+			$this->Logger->add("file $fname path is '$p'");
+		}
 	}
 
 	public function transform($module, $code){
@@ -128,6 +154,7 @@ class MyPHP {
 					break;
 				
 				default:
+					$this->Logger->add('$act is not NEED TYPE (mphp) type is ' . gettype($act));
 					throw new Exception('$act is not NEED TYPE (mphp) type is ' . gettype($act));
 					break;
 			}
@@ -147,21 +174,27 @@ class MyPHP {
 	public function renderCode(){
 		$code = file_get_contents($GLOBALS['fileinfo']['full']);
 		foreach ($this->module_list() as $file){
+			// echo $file . PHP_EOL;
 			$module = require $file;
 			if (basename($file) == 'index.php') {
-				// echo 'load module: ';
-				// echo basename(dirname($file)) . PHP_EOL;
+				// echo 'load large module: ';
+				$n = basename(dirname($file));
+				$this->Logger->add("load large module: '$n'");
+				// echo $n . PHP_EOL;
 			} else {
 				// echo 'load module: ';
+				$n = explode('.', basename($file))[0];
+				$this->Logger->add("load module: '$n'");
 				// echo explode('.', basename($file))[0] . PHP_EOL;
 				$cmn = explode('.', basename($file))[0];
-				if (count($this->module_loader->load_modules) > 0){
+				if (count($this->module_loader->load_modules)){
 					foreach ($this->module_loader->load_modules as $moule){
 						foreach ($moule as $name => $sets) {
 							if ($cmn = $name) {
 								if (!empty($sets)) {
 									$module->setSettings($sets);
 								} else {
+									$this->Logger->add("settings of module '$name' not be empty!");
 									throw new Exception("settings of module '$name' not be empty!");
 								}
 							}
@@ -175,35 +208,8 @@ class MyPHP {
 		}
 		file_put_contents($GLOBALS['fileinfo']['savefull'], $code);
 	}
-
-	public function create_start_config($mode = 'all'){
-		$config = [
-			'modules' => [],
-			'aliases' => [
-				'__con' => '__construct'
-			]
-		];
-		foreach ($this->module_loader->getModules() as $path){
-			$module_name = explode('.', basename($path))[0];
-			$current_module = require $path;
-			$module_settings = $current_module->getSettings();
-			if ($mode == 'all') {
-				$config['modules'][] = [
-					$module_name => $module_settings
-				];	
-			} elseif ($mode == 'use'){
-				if ($module_settings['use']) {
-					$config['modules'][] = [
-						$module_name => $module_settings
-					];
-				}
-			}
-		}
-		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-		$j = str_replace('    ', "\t", $j);
-		file_put_contents($this->conf_path, $j);
-	}
 }
 
-$p = '/home/kasiro/Документы/projects/testphp/test/main.jhp';
+$p = @$argv[1];
 $mphp = new MyPHP($p);
+(new Logger(__DIR__.'/log.txt'))->ot();

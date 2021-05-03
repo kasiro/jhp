@@ -8,5 +8,5 @@ $module->setSettings([
 ]);
 $n = explode('.', basename(__FILE__))[0];
 $module->setName($n);
-$module->addreg('/nl (.*);/m', 'echo $1 . "\n";');
+$module->addreg('/nl (.*);/m', 'echo $1 . PHP_EOL;');
 return $module;

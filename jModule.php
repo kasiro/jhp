@@ -1,7 +1,7 @@
 <?php
 
 class jModule {
-	public $settings = [];
+	protected $settings = [];
 	protected $name;
 	public $regList = [];
 
