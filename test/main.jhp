@@ -1,5 +1,11 @@
 <?php
 
-nl 'hello';
-nl 'friend';
-$->howdy();
+import_array [
+	'phpQuery'
+];
+
+try {
+	//code...
+} catch ($th) {
+	//throw $th;
+}

@@ -5,10 +5,10 @@
 # Сделать так что бы... можно было настроить каждый модуль из конфига папки проекта
 
 $throw_text = function ($path){
-	return "throw new Exception('[jhp: 404] $path');";
+	return "throw new Exception('[jhp: 404] $path user_module is not found...');";
 };
 
-define('FILE_REQ', '/home/kasiro/Документы/projects/testphp/user_modules');
+if (!defined('FILE_REQ')) define('FILE_REQ', '/home/kasiro/Документы/projects/testphp/user_modules');
 require __DIR__.'/func.php';
 
 $module = new jModule;
@@ -17,14 +17,14 @@ $module->setSettings([
 	'fullpath' => true,
 	'clean' => false
 ]);
-$n = explode('.', basename(__FILE__))[0];
+$n = basename(dirname(__FILE__));
 $module->setName($n);
 $module->addreg('/(.*)import \'(.*)\';/m', function ($matches) use ($throw_text){
 	$tabs = $matches[1];
 	$mp = FILE_REQ;
 	$paths = $matches[2];
 	$s = '';
-	if (is_string($paths)) {
+	if (is_string($paths) && strlen($paths)) {
 		if (file_exists("$mp/$paths.php")) {
 			$s .= "{$tabs}require '$mp/$paths.php';\n";
 		} else {
@@ -48,7 +48,7 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($th
 	$paths = $matches[2];
 	$s = '';
 	$modules_path = './jhp_modules';
-	if (is_string($paths)) {
+	if (is_string($paths) && strlen($paths)) {
 		if (file_exists("$modules_path/$paths.php")) {
 			$s .= "{$tabs}require '$modules_path/$paths.php';\n";
 		} else {
@@ -105,6 +105,7 @@ $module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m
 	if (!file_exists($dirname.'/jhp_modules')) {
 		mkdir($dirname.'/jhp_modules');
 	}
+	echo $dirname.'/jhp_modules' . PHP_EOL;
 	$modules_path = $dirname.'/jhp_modules';
 	$modules_path_local = './jhp_modules';
 	foreach ($paths as $path){
@@ -112,6 +113,7 @@ $module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m
 			$modules[] = "$mp/$path.php";
 			$s .= "{$tabs}require '$modules_path/$path.php';\n";
 		} else {
+			// echo "$mp/$path.php" . ' not exist' . PHP_EOL;
 			if (file_exists("$mp/$path") && is_dir("$mp/$path")) {
 				$files = myrglob("$mp/$path", '*.php');
 				foreach ($files as $file){
@@ -124,14 +126,15 @@ $module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m
 					$modules[] = $file;
 				}
 			} else {
+				// echo "$modules_path/$b" . ' not exist' . PHP_EOL;
 				$s .= "{$tabs}".$throw_text($path)."\n";
 			}
 		}
 	}
 	$mbs = [];
-	foreach ($modules as $module){
-		if (!in_array(basename($module), $mbs))
-			$mbs[] = basename($module);
+	foreach ($modules as $mod){
+		if (!in_array(basename($mod), $mbs))
+			$mbs[] = basename($mod);
 	}
 	if ($module->getSettings()['clean']) {
 		$m = array_diff(
@@ -144,9 +147,9 @@ $module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m
 			}
 		}
 	}
-	foreach ($modules as $module){
-		if (!file_exists($modules_path.'/'.basename($module))) {
-			copy($module, $modules_path.'/'.basename($module));
+	foreach ($modules as $mod){
+		if (!file_exists($modules_path.'/'.basename($mod))) {
+			copy($mod, $modules_path.'/'.basename($mod));
 		}
 	}
 	if ($i <= 0) {

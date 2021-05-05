@@ -1,20 +1,22 @@
 <?php
 
-function myrglob($base, $pattern, $flags = 0) {
-	if (substr($base, -1) !== DIRECTORY_SEPARATOR) {
-		$base .= DIRECTORY_SEPARATOR;
-	}
-
-	$files = glob($base.$pattern, $flags);
-	
-	foreach (glob($base.'*', GLOB_ONLYDIR|GLOB_NOSORT|GLOB_MARK) as $dir) {
-		$dirFiles = myrglob($dir, $pattern, $flags);
-		if ($dirFiles !== false) {
-			$files = array_merge($files, $dirFiles);
+if (!function_exists('myrglob')) {
+	function myrglob($base, $pattern, $flags = 0) {
+		if (substr($base, -1) !== DIRECTORY_SEPARATOR) {
+			$base .= DIRECTORY_SEPARATOR;
 		}
+	
+		$files = glob($base.$pattern, $flags);
+		
+		foreach (glob($base.'*', GLOB_ONLYDIR|GLOB_NOSORT|GLOB_MARK) as $dir) {
+			$dirFiles = myrglob($dir, $pattern, $flags);
+			if ($dirFiles !== false) {
+				$files = array_merge($files, $dirFiles);
+			}
+		}
+	
+		return $files;
 	}
-
-	return $files;
 }
 if (!function_exists('import')) {
 	/**

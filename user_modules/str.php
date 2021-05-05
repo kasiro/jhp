@@ -8,6 +8,7 @@
 // }
 
 class str {
+	
 	public static function contains($string, $find){
 		if (strpos($string, $find) !== false) {
 			return true;

@@ -7,6 +7,8 @@ $module->setSettings([
 ]);
 $n = explode('.', basename(__FILE__))[0];
 $module->setName($n);
-$settings = $module->getSettings();
-$module->addreg('/catch(\s*)\((\$.*)\)/m', 'catch$1('.$settings['Ex'].' $2)');
+$module->addreg('/catch(\s*)\((\$.*)\)/m', function ($matches) use (&$module) {
+	$settings = $module->getSettings();
+	return 'catch'.$matches[1].'('.$settings['Ex'].' '.$matches[2].')';
+});
 return $module;

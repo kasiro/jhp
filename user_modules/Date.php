@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Etc/GMT-7');
+
 class DateMain {
 	
 	/**
@@ -8,9 +10,7 @@ class DateMain {
 	 * @return string
 	 **/
 	public static function get_date(){
-		date_default_timezone_set('Etc/GMT-7');
-		$date = date('d.m.Y');
-		return $date;
+		return date('d.m.Y');
 	}
 
 	/**
@@ -19,9 +19,7 @@ class DateMain {
 	 * @return string
 	 **/
 	public static function get_time(){
-		date_default_timezone_set('Etc/GMT-7');
-		$time = date('G:i');
-		return $time;
+		return date('G:i');
 	}
 
 	/**
@@ -30,8 +28,6 @@ class DateMain {
 	 * @return string
 	 **/
 	public static function get_time_s(){
-		date_default_timezone_set('Etc/GMT-7');
-		$time = date('G:i:s');
-		return $time;
+		return date('G:i:s');
 	}
 }
