@@ -92,7 +92,7 @@ class Config {
 		$this->Logger->add("create_start_config mode is '$mode'");
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		$j = str_replace('    ', "\t", $j);
-		file_put_contents($this->conf_path, $j);
+		file_put_contents($this->conf_path, $j); 
 	}
 }
 class MyPHP {
@@ -194,7 +194,7 @@ class MyPHP {
 								if (!empty($sets)) {
 									$module->setSettings($sets);
 								} else {
-									$this->Logger->add("settings of module '$name' not be empty!");
+									$this->Logger->add("settings of module '{$name}' not be empty!");
 									throw new Exception("settings of module '$name' not be empty!");
 								}
 							}
@@ -212,4 +212,5 @@ class MyPHP {
 
 $p = @$argv[1];
 $mphp = new MyPHP($p);
-(new Logger(__DIR__.'/log.txt'))->ot();
+$loger = new Logger(__DIR__ . '/log.txt');
+$loger->ot();
