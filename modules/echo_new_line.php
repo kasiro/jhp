@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 // if (!class_exists('jModule')) require dirname(__DIR__).'/jModule.php';
 

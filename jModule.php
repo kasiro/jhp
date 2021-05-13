@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 class jModule {
 	protected $settings = [];
@@ -21,10 +21,10 @@ class jModule {
 	}
 
 	public function addreg(string $reg, string|callable $action){
-		if (!isset($this->regList[$reg])) {
+		if (!array_key_exists($reg, $this->regList)) {
 			$this->regList[$reg] = $action;
-			return;
+		} else {
+			throw new Exception('regexp is aelredy in $regList');
 		}
-		throw new Exception('regexp is aelredy in $regList');
 	}
 }

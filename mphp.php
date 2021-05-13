@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 # 1 - Абсолютная проходимость - Абсолютная передача данных
 require(__DIR__.'/com/logger.php');
 
@@ -52,9 +53,10 @@ class Config {
 
 	public static function find($file_path){
 		$arr = explode('/', dirname($file_path));
-		$cur_dir_up = '';
+		$dirPath =  dirname($file_path);
 		for ($i = 0; $i < count($arr); $i++){
-			$cur_dir_up .= $i == 0 ? $arr[$i] : '/' . $arr[$i];
+			$cur_dir_up = $dirPath;
+			// echo $cur_dir_up . PHP_EOL;
 			$files = glob($cur_dir_up . '/*.config');
 			if (count($files) > 0) {
 				foreach ($files as $file){
@@ -63,6 +65,7 @@ class Config {
 					}
 				}
 			}
+			$dirPath = dirname($dirPath);
 		}
 		return false;
 	}
@@ -75,8 +78,9 @@ class Config {
 			]
 		];
 		foreach ($MyPHP->module_loader->getModules() as $path){
-			$module_name = explode('.', basename($path))[0];
 			$current_module = require $path;
+			// $module_name = explode('.', basename($path))[0];
+			$module_name = $current_module->getName();
 			$module_settings = $current_module->getSettings();
 			if ($mode == 'all') {
 				$config['modules'][] = [
@@ -91,8 +95,9 @@ class Config {
 			}
 		}
 		foreach ($MyPHP->module_loader->load_larege_modules() as $path){
-			$module_name = basename(dirname($path));
+			// $module_name = basename(dirname($path));
 			$current_module = require $path;
+			$module_name = $current_module->getName();
 			$module_settings = $current_module->getSettings();
 			if ($mode == 'all') {
 				$config['modules'][] = [
@@ -183,7 +188,10 @@ class MyPHP {
 
 	public function module_list(){
 		foreach ($this->module_loader->getModules() as $file){
-			yield $file;
+			$current_module = require $file;
+			if ($current_module->getSettings()['use'] === true) {
+				yield $file;
+			}
 		}
 		foreach ($this->module_loader->load_larege_modules() as $file){
 			yield $file;
@@ -202,38 +210,33 @@ class MyPHP {
 
 	public function renderCode(){
 		$code = file_get_contents($GLOBALS['fileinfo']['full']);
+		$load_modules = $this->module_loader->load_modules;
 		foreach ($this->module_list() as $file){
 			// echo $file . PHP_EOL;
 			$module = require $file;
-			if (basename($file) == 'index.php') {
-				// echo 'load large module: ';
-				$name = $module->getName();
-				$this->Logger->add("load large module: '$name'");
-				if (count($this->module_loader->load_modules) > 0) {
-					$sets = $this->setConfigSettings($module);
-					if (!empty($sets)) {
-						$this->Logger->add("load settings for large module: '$name'");
-						$module->setSettings($sets);
-					} else {
+			$name = $module->getName();
+			$module_type = basename($file) == 'index.php' ? 'large' : 'module';
+			// if ($module_type == 'large')
+			if ($module_type == 'large') $this->Logger->add("load large module: '$name'");
+			else $this->Logger->add("load module: '$name'");
+
+			if (count($load_modules) > 0) {
+				$sets = $this->setConfigSettings($module);
+				if (!empty($sets)) {
+					// if ($module_type == 'large') {
+					// 	$this->Logger->add("load settings for large module: '$name'");
+					// } else {
+					// 	$this->Logger->add("load settings for module: '$name'");
+					// }
+					$module->setSettings($sets);
+				} else {
+					if ($module_type == 'large') {
 						$this->Logger->add("settings of large module '{$name}' not be empty!");
 						throw new Exception("settings of large module '$name' not be empty!");
-					}
-				}
-				// echo $n . PHP_EOL;
-			} else {
-				// echo 'load module: ';
-				$name = $module->getName();
-				$this->Logger->add("load module: '$name'");
-				// echo explode('.', basename($file))[0] . PHP_EOL;
-				if (count($this->module_loader->load_modules) > 0) {
-					$sets = $this->setConfigSettings($module);
-					if (!empty($sets)) {
-						$this->Logger->add("load settings for module: '$name'");
-						$module->setSettings($sets);
 					} else {
 						$this->Logger->add("settings of module '{$name}' not be empty!");
 						throw new Exception("settings of module '$name' not be empty!");
-					}
+					}	
 				}
 			}
 			if ($module->getSettings()['use'] === true){
@@ -256,5 +259,4 @@ class MyPHP {
 
 $p = @$argv[1];
 $mphp = new MyPHP($p);
-$loger = new Logger(__DIR__ . '/log.txt');
-$loger->ot();
+(new Logger(__DIR__ . '/log.txt'))->ot();

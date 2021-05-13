@@ -105,7 +105,7 @@ $module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m
 	if (!file_exists($dirname.'/jhp_modules')) {
 		mkdir($dirname.'/jhp_modules');
 	}
-	echo $dirname.'/jhp_modules' . PHP_EOL;
+	// echo $dirname.'/jhp_modules' . PHP_EOL;
 	$modules_path = $dirname.'/jhp_modules';
 	$modules_path_local = './jhp_modules';
 	foreach ($paths as $path){
