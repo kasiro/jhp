@@ -29,11 +29,11 @@ class uid_generator {
 	}
 
 	/**
-	 * generate standart uid from mask 99999999-9999-9999-9999-999999999999
+	 * generate standart uid from mask xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 	 * @return string
 	 **/
 	public static function generate_standart_uid($set = false){
-		return static::uid_generate('99999999-9999-9999-9999-999999999999', '9');
+		return static::uid_generate('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', 'x');
 	}
 
 }
