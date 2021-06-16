@@ -206,7 +206,7 @@ EOF;
         if ($this->registry->getValue('current') > $current)
             throw new \InvalidArgumentException('Could not set lower current counter');
 
-        if($this->registry->getValue('max') < $current)
+        if ($this->registry->getValue('max') < $current)
             throw new \InvalidArgumentException('Could not set the progress value ' . $current .
                 ' because the max is ' . $this->registry->getValue('max'));
 

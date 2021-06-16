@@ -1,11 +1,15 @@
 <?php
 
-import_array [
-	'phpQuery'
-];
+$name = 'Danil';
+$surname = 'Kashirskikh';
+$main = () => {
+	$loop = () => {
+		nl 'hello ', $name, ' ', $surname;
+	};
+	$loop();
+};
+$main();
 
-try {
-	//code...
-} catch ($th) {
-	//throw $th;
-}
+$bot->app(fn($message) use (&$bot) => {
+	
+});

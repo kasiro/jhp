@@ -7,8 +7,8 @@ class folder_copy
 	public static $i = 0;
 
 	function __construct($from) {
-		require_once '/home/kasiro/Документы/php/other_scripts/other_scripts/PHP-CLI-Progress-Bar-master/ProgressBar/Manager.php';
-		require_once '/home/kasiro/Документы/php/other_scripts/other_scripts/PHP-CLI-Progress-Bar-master/ProgressBar/Registry.php';
+		require_once '/home/kasiro/Документы/projects/testphp/user_modules/scripts/Bar/ProgressBar/Manager.php';
+		require_once '/home/kasiro/Документы/projects/testphp/user_modules/scripts/Bar/ProgressBar/Registry.php';
 		$count = static::getFilesRDI($from);
 		$this->progress = new Manager(0, $count);
 	}
@@ -37,7 +37,7 @@ class folder_copy
 	
 	public function clean($text = '', $path)
     {
-		$count = static::getFilesRec($path);
+		$count = static::getFilesRDI($path);
 		$manager = new Manager(0, $count);
 		if ($text != '') {
 			$this->progress->setFormat('%text%: %current%/%max% [%bar%] %percent%' . "\r\n" . '%file%');

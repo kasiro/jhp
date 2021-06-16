@@ -198,30 +198,24 @@ class MyPHP {
 		}
 	}
 
-	public function setConfigSettings($module){
-		if (count($this->module_loader->load_modules) > 0){
-			foreach ($this->module_loader->load_modules as $moule){
-				if (array_key_exists($module->getName(), $moule)) {
-					return $moule[$module->getName()];
-				}
+	public function getConfigSettings($module){
+		foreach ($this->module_loader->load_modules as $moule){
+			if (array_key_exists($module->getName(), $moule)) {
+				return $moule[$module->getName()];
 			}
 		}
+		return ['use' => false];
 	}
 
 	public function renderCode(){
 		$code = file_get_contents($GLOBALS['fileinfo']['full']);
-		$load_modules = $this->module_loader->load_modules;
+		$load_modules = &$this->module_loader->load_modules;
 		foreach ($this->module_list() as $file){
 			// echo $file . PHP_EOL;
 			$module = require $file;
-			$name = $module->getName();
-			$module_type = basename($file) == 'index.php' ? 'large' : 'module';
 			// if ($module_type == 'large')
-			if ($module_type == 'large') $this->Logger->add("load large module: '$name'");
-			else $this->Logger->add("load module: '$name'");
-
 			if (count($load_modules) > 0) {
-				$sets = $this->setConfigSettings($module);
+				$sets = $this->getConfigSettings($module);
 				if (!empty($sets)) {
 					// if ($module_type == 'large') {
 					// 	$this->Logger->add("load settings for large module: '$name'");
@@ -230,6 +224,7 @@ class MyPHP {
 					// }
 					$module->setSettings($sets);
 				} else {
+					$name = $module->getName();
 					if ($module_type == 'large') {
 						$this->Logger->add("settings of large module '{$name}' not be empty!");
 						throw new Exception("settings of large module '$name' not be empty!");
@@ -240,6 +235,9 @@ class MyPHP {
 				}
 			}
 			if ($module->getSettings()['use'] === true){
+				$module_type = basename($file) == 'index.php' ? 'large' : 'module';
+				if ($module_type == 'large') $this->Logger->add("load large module: '$name'");
+				else $this->Logger->add("load module: '$name'");
 				// print_r([
 				// 	$module->getName() => $module->getSettings()
 				// ]);

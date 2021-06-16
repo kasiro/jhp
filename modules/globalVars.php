@@ -1,11 +1,10 @@
 <?php declare(strict_types=1);
 
-// if (!class_exists('jModule')) require dirname(__DIR__).'/jModule.php';
-
 $module = new jModule;
 $module->setSettings([
 	'use' => true
 ]);
 $module->setName(explode('.', basename(__FILE__))[0]);
-$module->addreg('/nl (.*);/m', 'echo $1 . PHP_EOL;');
+$module->addreg('/<\$(\w+):\s*((?:(?(R)\w++|[^<>]*+)|(?R))*)>/m', "\$GLOBALS['$1'] = $2;");
+$module->addreg('/<\$\w+>/m', "\$GLOBALS['$1']");
 return $module;
