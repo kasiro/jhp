@@ -55,12 +55,14 @@ $var = function($var1, $var2) use ($console_log) {
 };
 ```
 ```php
-$var = fn($var1, $var2) {
-    
+$var = ($var1, $var2) => {
+    $console_log('text');
 };
 ->
-$var = function($var1, $var2) {
-    
+$allvars = get_defined_vars();
+$var = function($var1, $var2) use ($allvars) {
+    extract($allvars);
+    $console_log('text');
 };
 ```
 
