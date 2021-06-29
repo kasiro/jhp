@@ -23,7 +23,7 @@ $module->addreg('/(\w*)::(\w*)\(\)/m', function ($matches) {
 				break;
 			
 			default:
-				return "throw new Exception('undefiend method name $matches[2] of class $matches[1]')";
+				return $matches[0];
 				break;
 		}
 	}

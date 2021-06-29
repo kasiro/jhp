@@ -213,6 +213,7 @@ class MyPHP {
 		foreach ($this->module_list() as $file){
 			// echo $file . PHP_EOL;
 			$module = require $file;
+			$name = $module->getName();
 			// if ($module_type == 'large')
 			if (count($load_modules) > 0) {
 				$sets = $this->getConfigSettings($module);

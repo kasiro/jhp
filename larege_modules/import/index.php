@@ -4,11 +4,48 @@
 
 # Сделать так что бы... можно было настроить каждый модуль из конфига папки проекта
 
+function leveling($path, $level = 0){
+	if ($path == './' || $path == '/') {
+		return __DIR__;
+	} else {
+		if ($level > 0) {
+			$npath = '';
+			if (str_contains($path, '/')) {
+				$sep = '/';
+			}
+			if (str_contains($path, '\\')) {
+				$sep = '\\';
+			}
+			if ($level < count(explode($sep, $path))) {
+				$arr = explode($sep, $path);
+				for ($i = 0; $i < count($arr) - ($level); $i++) { 
+					if ($i != count($arr) - ($level) - 1) {
+						$npath .= $arr[$i] . $sep;
+					} else {
+						$npath .= $arr[$i];
+					}
+				}
+				if ((count(explode($sep, $path)) - 1) == $level) {
+					$npath .= $sep;
+				}
+				if (strlen($npath) > 0) {
+					return $npath;
+				}
+			} else {
+				echo 'ERROR: $level > count(explode($sep, $path))' . "\n";
+			}
+		} else {
+			return $path;
+		}
+	}
+}
+
 $throw_text = function ($path){
 	return "throw new Exception('[jhp: 404] $path user_module is not found...');";
 };
 
-if (!defined('FILE_REQ')) define('FILE_REQ', '/home/kasiro/Документы/projects/testphp/user_modules');
+$path = leveling(__DIR__, 2);
+if (!defined('FILE_REQ')) define('FILE_REQ', $path.'/user_modules');
 require __DIR__.'/func.php';
 
 $module = new jModule;

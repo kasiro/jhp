@@ -6,11 +6,12 @@ $module->setSettings([
 ]);
 $module->setName(explode('.', basename(__FILE__))[0]);
 $module->addreg(
-	'/(.*?)"(.*?[^\\])"/m',
+	'/(.*?)"(.*?[^\\\\])"/m',
 	function ($matches){
 		if (!str_contains($matches[2], '$') && !str_contains($matches[1], 'import')) {
 			return $matches[1]."'".$matches[2]."'";
 		}
+		return $matches[0];
 	}
 );
 return $module;
