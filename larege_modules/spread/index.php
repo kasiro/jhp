@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 require __DIR__.'/func.php';
-
+// Test Module
 $module = new jModule;
 $module->setSettings([
 	'use' => false

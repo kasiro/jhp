@@ -2,7 +2,8 @@
 
 $module = new jModule;
 $module->setSettings([
-	'use' => true
+	'use' => true,
+	'desc' => '\"текст без $\" -> \'текст без $\''
 ]);
 $module->setName(explode('.', basename(__FILE__))[0]);
 $module->addreg(

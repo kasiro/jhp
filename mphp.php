@@ -112,7 +112,7 @@ class Config {
 			}
 		}
 		$MyPHP->Logger->add("create_start_config mode is '$mode'");
-		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 		$j = str_replace('    ', "\t", $j);
 		file_put_contents($MyPHP->conf_path, $j);
 	}
