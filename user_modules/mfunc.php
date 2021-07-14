@@ -8,9 +8,18 @@ if (!function_exists('is_list')) {
 
 if (!function_exists('jscandir')) {
 	function jscandir($s){
-		return array_filter(
+		return array_diff(
 			scandir($s),
-			fn($e) => !in_array($e, ['.', '..'])
+			['.', '..']
 		);
+	}
+}
+
+if (!function_exists('str_contains')) {
+	function str_contains($string, $find){
+		if (strpos($string, $find) !== false) {
+			return true;
+		}
+		return false;
 	}
 }
