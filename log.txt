@@ -13798,3 +13798,23 @@
 [14.07.2021][17:22] load module: 'this'
 [14.07.2021][17:22] load large module: 'import'
 
+[14.07.2021][17:37] file full path is '/home/kasiro/Документы/projects/mgr/editor.jhp'
+[14.07.2021][17:37] file dirname path is '/home/kasiro/Документы/projects/mgr'
+[14.07.2021][17:37] file basename path is 'editor.jhp'
+[14.07.2021][17:37] file savefull path is '/home/kasiro/Документы/projects/mgr/editor.php'
+[14.07.2021][17:37] Конфиг не найден
+[14.07.2021][17:37] load module: 'catch'
+[14.07.2021][17:37] load module: 'class_no_func'
+[14.07.2021][17:37] load module: 'classes'
+[14.07.2021][17:37] load module: 'comcom'
+[14.07.2021][17:37] load module: 'echo_new_line'
+[14.07.2021][17:37] load module: 'fn'
+[14.07.2021][17:37] load module: 'forvar'
+[14.07.2021][17:37] load module: 'global'
+[14.07.2021][17:37] load module: 'globalVars'
+[14.07.2021][17:37] load module: 'js_else'
+[14.07.2021][17:37] load module: 'js_list'
+[14.07.2021][17:37] load module: 'testjsFn'
+[14.07.2021][17:37] load module: 'this'
+[14.07.2021][17:37] load large module: 'import'
+
