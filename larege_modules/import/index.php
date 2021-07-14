@@ -79,21 +79,74 @@ $module->addreg('/(.*)import \'(.*)\';/m', function ($matches) use ($throw_text)
 	$s = str_replace(';require', ";\nrequire", $s);
 	return $s;
 });
-$module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($throw_text){
+$module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($module, $throw_text){
+	$i = 0;
+	restart2:
 	$tabs = $matches[1];
 	$mp = FILE_REQ;
 	$paths = $matches[2];
 	$s = '';
-	$modules_path = './jhp_modules';
+	$modules = [];
+	$s = '';
+	$dirname = $GLOBALS['fileinfo']['dirname'];
+	if (!file_exists($dirname.'/jhp_modules')) {
+		mkdir($dirname.'/jhp_modules');
+	}
+	// echo $dirname.'/jhp_modules' . PHP_EOL;
+	$modules_path = $dirname.'/jhp_modules';
+	$modules_path_local = './jhp_modules';
 	if (is_string($paths) && strlen($paths)) {
-		if (file_exists("$modules_path/$paths.php")) {
+		if (file_exists("$mp/$paths.php")) {
+			$modules[] = "$mp/$paths.php";
 			$s .= "{$tabs}require '$modules_path/$paths.php';\n";
 		} else {
-			$s .= "{$tabs}".$throw_text($paths)."\n";
+			if (file_exists("$mp/$paths") && is_dir("$mp/$paths")) {
+				$files = myrglob("$mp/$paths", '*.php');
+				foreach ($files as $file){
+					$b = basename($file);
+					if (file_exists("$modules_path/$b")) {
+						$s .= "{$tabs}require '$modules_path/$b';\n";
+					} else {
+						$s .= "{$tabs}require '$file';\n";
+					}
+					$modules[] = $file;
+				}
+			} else {
+				$s .= "{$tabs}".$throw_text($path)."\n";
+			}
 		}
+	}
+	$mbs = [];
+	foreach ($modules as $mod){
+		if (!in_array(basename($mod), $mbs))
+			$mbs[] = basename($mod);
+	}
+	if ($module->getSettings()['clean']) {
+		$m = array_diff(
+			scandir($modules_path),
+			['.', '..']
+		);
+		foreach ($m as $new_module){
+			if (!in_array($new_module, $mbs)) {
+				unlink($modules_path.'/'.$new_module);
+			}
+		}
+	}
+	foreach ($modules as $mod){
+		if (!file_exists($modules_path.'/'.basename($mod))) {
+			copy($mod, $modules_path.'/'.basename($mod));
+		}
+	}
+	if ($i <= 0) {
+		$i++;
+		goto restart2;
 	}
 	$s = str_replace("\n", '', $s);
 	$s = str_replace(';require', ";\nrequire", $s);
+	$s = str_replace(';throw', ";\nthrow", $s);
+	if (!$module->getSettings()['fullpath']) {
+		$s = str_replace($dirname, '.', $s);
+	}
 	return $s;
 });
 $module->addreg('/(.*)import_array \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', function ($matches) use ($throw_text){
