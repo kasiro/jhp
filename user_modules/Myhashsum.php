@@ -40,6 +40,14 @@ class general {
 		return $list;
 	}
 
+	public function update_folder($to, $from){
+		# $to = path/stie
+		# $from = path/Updates/site_0-3
+		# path/stie/text.txt нету
+		# path/Updates/site_0-3/text.txt есть
+		# site_0-3/text.txt -> path/stie/text.txt
+	}
+
 	public function gen_hashsum(){
 		$list = $this->scan_folder($this->get_scan_folder());
 		$hash_path = $this->get_hash_folder();
