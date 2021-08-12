@@ -1,7 +1,7 @@
 <?php
 
-$name = 'Danil';
-$surname = 'Kashirskikh';
+$name = 'Imya';
+$surname = 'Familya';
 $main = () => {
 	$hello = () => {
 		nl 'hello ', $name, ' ', $surname;

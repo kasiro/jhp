@@ -1,7 +1,7 @@
 <?php
 
-$name = 'Danil';
-$surname = 'Kashirskikh';
+$name = 'Imya';
+$surname = 'Familya';
 $allvars = get_defined_vars();
 $main = function() use ($allvars) {
 	extract($allvars);
