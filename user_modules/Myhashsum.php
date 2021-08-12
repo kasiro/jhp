@@ -48,7 +48,7 @@ class general {
 		# site_0-3/text.txt -> path/stie/text.txt
 	}
 
-	public function gen_hashsum(){
+	public function gen_hashsum($echo = true){
 		$list = $this->scan_folder($this->get_scan_folder());
 		$hash_path = $this->get_hash_folder();
 		if (count($list) > 0) {
@@ -58,12 +58,12 @@ class general {
 				$save_path .= '.hashsum';
 				$hashsum = $this->getHashSum($full_path);
 				file_put_contents($hash_path.'/'.$save_path, $hashsum);
-				echo $mini_path . ' : hashed' . PHP_EOL;
+				if ($echo) echo $mini_path . ' : hashed' . PHP_EOL;
 			}
 		}
 	}
 
-	public function full_match(){
+	public function full_match($echo = true){
 		$scan_list = $this->scan_folder($this->get_scan_folder());
 		$hash_path = $this->get_hash_folder();
 		if (count($scan_list) > 0) {
@@ -77,7 +77,7 @@ class general {
 				if (strlen($saved_hashsum) > 0) {
 					if ($this->getHashSum($full_path) !== $saved_hashsum) return false;
 				} else {
-					echo $mini_path . ' : no-hashsum' . PHP_EOL;
+					if ($echo) echo $mini_path . ' : no-hashsum' . PHP_EOL;
 				}
 			}
 		}

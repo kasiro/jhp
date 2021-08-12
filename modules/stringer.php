@@ -2,14 +2,23 @@
 
 $module = new jModule;
 $module->setSettings([
-	'use' => false,
+	'use' => true,
 	'desc' => '\"текст без $\" -> \'текст без $\''
 ]);
 $module->setName(explode('.', basename(__FILE__))[0]);
 $module->addreg(
 	'/(.*?)"(.*?[^\\\\])"/m',
 	function ($matches){
-		if (!str_contains($matches[2], '$') && !str_contains($matches[1], 'import')) {
+		$black_list = [
+			'\n',
+			'\r',
+			'\t'
+		];
+		if (strlen($matches[2]) == 0) return $matches[1]."'".$matches[2]."'";
+		if (!str_contains($matches[2], '$') && !str_contains($matches[1], 'import') ) {
+			if (str_contains($matches[2], "'")){
+				$matches[2] = preg_replace("/([^\\\\])\'/m", "$1\\'", $matches[2]);
+			}
 			return $matches[1]."'".$matches[2]."'";
 		}
 		return $matches[0];

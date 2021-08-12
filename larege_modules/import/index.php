@@ -4,38 +4,40 @@
 
 # Сделать так что бы... можно было настроить каждый модуль из конфига папки проекта
 
-function leveling($path, $level = 0){
-	if ($path == './' || $path == '/') {
-		return __DIR__;
-	} else {
-		if ($level > 0) {
-			$npath = '';
-			if (str_contains($path, '/')) {
-				$sep = '/';
-			}
-			if (str_contains($path, '\\')) {
-				$sep = '\\';
-			}
-			if ($level < count(explode($sep, $path))) {
-				$arr = explode($sep, $path);
-				for ($i = 0; $i < count($arr) - ($level); $i++) { 
-					if ($i != count($arr) - ($level) - 1) {
-						$npath .= $arr[$i] . $sep;
-					} else {
-						$npath .= $arr[$i];
+if (!function_exists('leveling')){
+	function leveling($path, $level = 0){
+		if ($path == './' || $path == '/') {
+			return __DIR__;
+		} else {
+			if ($level > 0) {
+				$npath = '';
+				if (str_contains($path, '/')) {
+					$sep = '/';
+				}
+				if (str_contains($path, '\\')) {
+					$sep = '\\';
+				}
+				if ($level < count(explode($sep, $path))) {
+					$arr = explode($sep, $path);
+					for ($i = 0; $i < count($arr) - ($level); $i++) { 
+						if ($i != count($arr) - ($level) - 1) {
+							$npath .= $arr[$i] . $sep;
+						} else {
+							$npath .= $arr[$i];
+						}
 					}
-				}
-				if ((count(explode($sep, $path)) - 1) == $level) {
-					$npath .= $sep;
-				}
-				if (strlen($npath) > 0) {
-					return $npath;
+					if ((count(explode($sep, $path)) - 1) == $level) {
+						$npath .= $sep;
+					}
+					if (strlen($npath) > 0) {
+						return $npath;
+					}
+				} else {
+					echo 'ERROR: $level > count(explode($sep, $path))' . "\n";
 				}
 			} else {
-				echo 'ERROR: $level > count(explode($sep, $path))' . "\n";
+				return $path;
 			}
-		} else {
-			return $path;
 		}
 	}
 }
@@ -58,6 +60,9 @@ $n = basename(dirname(__FILE__));
 $module->setName($n);
 $module->addreg('/(.*)import \'(.*)\';/m', function ($matches) use ($throw_text){
 	$tabs = $matches[1];
+	if (str_contains($tabs, '// ') || preg_match('/\w+/m', $tabs)){
+		return $matches[0];
+	}
 	$mp = FILE_REQ;
 	$paths = $matches[2];
 	$s = '';
@@ -83,6 +88,9 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($mo
 	$i = 0;
 	restart2:
 	$tabs = $matches[1];
+	if (str_contains($tabs, '// ') || preg_match('/\w+/m', $tabs)){
+		return $matches[0];
+	}
 	$mp = FILE_REQ;
 	$paths = $matches[2];
 	$s = '';
@@ -151,7 +159,7 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($mo
 });
 $module->addreg('/(.*)import_array \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', function ($matches) use ($throw_text){
 	$tabs = $matches[1];
-	if (str_contains($tabs, '// ')) {
+	if (str_contains($tabs, '// ') || preg_match('/\w+/m', $tabs)){
 		return $matches[0];
 	}
 	$module_name = $matches[2];
@@ -178,11 +186,11 @@ $module->addreg('/(.*)import_array \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', functi
 	$s = str_replace(';throw', ";\nthrow", $s);
 	return $s;
 });
-$module->addreg('/(.*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', function ($matches) use ($throw_text, &$module){
+$module->addreg('/(\t*|\s*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', function ($matches) use ($throw_text, &$module){
 	$i = 0;
 	restart:
 	$tabs = $matches[1];
-	if (str_contains($tabs, '// ')) {
+	if (str_contains($tabs, '// ') || preg_match('/\w+/m', $tabs)){
 		return $matches[0];
 	}
 	$module_name = $matches[2];

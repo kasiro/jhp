@@ -3,13 +3,15 @@
 $name = 'Danil';
 $surname = 'Kashirskikh';
 $main = () => {
-	$loop = () => {
+	$hello = () => {
 		nl 'hello ', $name, ' ', $surname;
 	};
-	$loop();
+	$hello();
 };
 $main();
 
 $bot->app(fn($message) use (&$bot) => {
 	
 });
+
+nl "hello \"{$name}\", im lisa";
