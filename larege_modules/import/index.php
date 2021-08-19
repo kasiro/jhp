@@ -143,6 +143,12 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($mo
 	foreach ($modules as $mod){
 		if (!file_exists($modules_path.'/'.basename($mod))) {
 			copy($mod, $modules_path.'/'.basename($mod));
+		} else {
+			$before = file_get_contents($mod);
+			$after = file_get_contents($modules_path.'/'.basename($mod));
+			if ($before !== $after){
+				copy($mod, $modules_path.'/'.basename($mod));
+			}
 		}
 	}
 	if ($i <= 0) {
