@@ -50,7 +50,7 @@ if (!function_exists('import_array')) {
 	 * @return array
 	 */
 	function import_array(string $path){
-		eval('$files'." = [$path];");
+		eval('$files'." = [$path];");/*  */
 		foreach ($files as $file){
 			if (!is_string($file)) {
 				throw new Exception('[jhp: 404] import_array el is not STRING');

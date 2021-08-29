@@ -9,6 +9,10 @@ $module->setName(explode('.', basename(__FILE__))[0]);
 $module->addreg(
 	'/( *|\t*)([^\t\n]*)\(([^(]*)\) => {/m',
 	function ($matches) use (&$module){
+		if (
+			str_starts_with($matches[0], '// ')
+			|| str_starts_with($matches[0], '#')
+		) return $matches[0];
 		$settings = $module->getSettings();
 		if (!preg_match('/fn\(.*\)/m', $matches[1]) && !preg_match('/fn\(.*\) use \(.*\)/m', $matches[1])){
 			if ($settings['spaces']){
@@ -16,6 +20,7 @@ $module->addreg(
 			} else {
 				$separator = "\t";
 			}
+			$end_string = '';
 			$end_string .= $matches[1];
 			$end_string .= '$allvars = get_defined_vars();';
 			$end_string .= "\n";

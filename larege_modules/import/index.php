@@ -1,10 +1,9 @@
 <?php
 
 // if (!class_exists('jModule')) require $GLOBALS['jModule'];
+require dirname(__DIR__).'/Helper.php';
 
-# Сделать так что бы... можно было настроить каждый модуль из конфига папки проекта
-
-if (!function_exists('leveling')){
+if (!function_exists('leveling') && dirname(__DIR__, 2) != __DIR__ || dirname(__DIR__, 2) != dirname(__DIR__)){
 	function leveling($path, $level = 0){
 		if ($path == './' || $path == '/') {
 			return __DIR__;
@@ -33,20 +32,58 @@ if (!function_exists('leveling')){
 						return $npath;
 					}
 				} else {
-					echo 'ERROR: $level > count(explode($sep, $path))' . "\n";
+					echo 'ERROR: $level > count(explode($sep, $path))' . PHP_EOL;
 				}
 			} else {
 				return $path;
 			}
 		}
 	}
+	$path = leveling(__DIR__, 2);
+} else {
+	$path = dirname(__DIR__, 2);
+}
+
+if (!function_exists('create_jhp_modules')){
+	function create_jhp_modules($dirname){
+		$AllModules = [];
+		$ImportModules = JhpHelper::getImportModules($GLOBALS['fileinfo']['full']);
+		$AllModules = array_merge($AllModules, $ImportModules);
+		$dirDfiles = myrglob(dirname($dirname), '*.jhp');
+		$dirDfiles = array_filter($dirDfiles, function($el){
+			if ($el != $GLOBALS['fileinfo']['full']){
+				return $el;
+			}
+		});
+		if (!empty($dirDfiles)){
+			foreach ($dirDfiles as $dfile){
+				// echo $dfile . PHP_EOL;
+				$ImportModulesFile = JhpHelper::getImportModules($dfile);
+				$AllModules = array_merge($AllModules, $ImportModulesFile);
+			}
+		}
+		$countValues = array_keys(array_filter(array_count_values($AllModules), function($v){
+			return $v > 1;
+		}));
+		if (!empty($countValues) && count($countValues) > 0){
+			$dirDir = true;
+			$dirname = dirname($dirname);
+			if (!file_exists($dirname.'/jhp_modules')) {
+				mkdir($dirname.'/jhp_modules');
+			}
+		} else {
+			if (!file_exists($dirname.'/jhp_modules')) {
+				mkdir($dirname.'/jhp_modules');
+			}
+		}
+		return $dirname;
+	}	
 }
 
 $throw_text = function ($path){
 	return "throw new Exception('[jhp: 404] $path user_module is not found...');";
 };
 
-$path = leveling(__DIR__, 2);
 if (!defined('FILE_REQ')) define('FILE_REQ', $path.'/user_modules');
 require __DIR__.'/func.php';
 
@@ -91,36 +128,37 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($mo
 	if (str_contains($tabs, '// ') || preg_match('/\w+/m', $tabs)){
 		return $matches[0];
 	}
+	# Путь до user_modules
 	$mp = FILE_REQ;
+	# Название файла
 	$paths = $matches[2];
 	$s = '';
 	$modules = [];
 	$s = '';
+	# Директория файла
 	$dirname = $GLOBALS['fileinfo']['dirname'];
-	if (!file_exists($dirname.'/jhp_modules')) {
-		mkdir($dirname.'/jhp_modules');
-	}
+	$dirname = create_jhp_modules($dirname);
 	// echo $dirname.'/jhp_modules' . PHP_EOL;
 	$modules_path = $dirname.'/jhp_modules';
 	$modules_path_local = './jhp_modules';
 	if (is_string($paths) && strlen($paths)) {
 		if (file_exists("$mp/$paths.php")) {
 			$modules[] = "$mp/$paths.php";
-			$s .= "{$tabs}require '$modules_path/$paths.php';\n";
+			$s .= "{$tabs}require '$modules_path/$paths.php';".PHP_EOL;
 		} else {
 			if (file_exists("$mp/$paths") && is_dir("$mp/$paths")) {
 				$files = myrglob("$mp/$paths", '*.php');
 				foreach ($files as $file){
 					$b = basename($file);
 					if (file_exists("$modules_path/$b")) {
-						$s .= "{$tabs}require '$modules_path/$b';\n";
+						$s .= "{$tabs}require '$modules_path/$b';".PHP_EOL;
 					} else {
-						$s .= "{$tabs}require '$file';\n";
+						$s .= "{$tabs}require '$file';".PHP_EOL;
 					}
 					$modules[] = $file;
 				}
 			} else {
-				$s .= "{$tabs}".$throw_text($path)."\n";
+				$s .= "{$tabs}".$throw_text($path).PHP_EOL;
 			}
 		}
 	}
@@ -206,9 +244,7 @@ $module->addreg('/(\t*|\s*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)
 	$modules = [];
 	$s = '';
 	$dirname = $GLOBALS['fileinfo']['dirname'];
-	if (!file_exists($dirname.'/jhp_modules')) {
-		mkdir($dirname.'/jhp_modules');
-	}
+	$dirname = create_jhp_modules($dirname);
 	// echo $dirname.'/jhp_modules' . PHP_EOL;
 	$modules_path = $dirname.'/jhp_modules';
 	$modules_path_local = './jhp_modules';

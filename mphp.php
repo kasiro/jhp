@@ -99,16 +99,20 @@ class Config {
 			$current_module = require $path;
 			$module_name = $current_module->getName();
 			$module_settings = $current_module->getSettings();
-			if ($mode == 'all') {
-				$config['modules'][] = [
-					$module_name => $module_settings
-				];
-			} elseif ($mode == 'use'){
-				if ($module_settings['use']) {
+			switch ($mode) {
+				case 'all':
 					$config['modules'][] = [
 						$module_name => $module_settings
 					];
-				}
+					break;
+				
+				case 'use':
+					if ($module_settings['use']) {
+						$config['modules'][] = [
+							$module_name => $module_settings
+						];
+					}
+					break;
 			}
 		}
 		$MyPHP->Logger->add("create_start_config mode is '$mode'");
@@ -122,6 +126,10 @@ class MyPHP {
 	
 	public function isJhp($path) {
 		if (explode('.', basename($path))[1] !== 'jhp') {
+			// Нереально из за \\.jhp (VS Code)
+			// $this->Logger = new Logger(__DIR__.'/log.txt');
+			// $this->Logger->add('file is not jhp');
+			// system('notify-send "JHP" "file is not jhp"');
 			throw new Exception('file is not jhp');
 		}
 	}
@@ -136,6 +144,7 @@ class MyPHP {
 		if ($conf_path = Config::find($path)) {
 			// echo $conf_path . PHP_EOL;
 			$this->conf_path = $conf_path;
+			$GLOBALS['conf_path'] = $conf_path;
 			$json = file_get_contents($this->conf_path);
 			if (strlen($json) == 0) {
 				echo 'Заполняем конфиг' . PHP_EOL;
