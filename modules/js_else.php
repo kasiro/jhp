@@ -35,7 +35,7 @@ $module->setSettings([
 	'use' => true,
 	'mini' => false
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $module->addreg('/^(\$.*) = (.*)(\|)(.*?);/m', function ($matches) use (&$module) {
 	$settings = $module->getSettings();
 	$res = '';

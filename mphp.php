@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
 # 1 - Абсолютная проходимость - Абсолютная передача данных
-require(__DIR__.'/com/logger.php');
+if (!class_exists('Logger')) require(__DIR__.'/com/logger.php');
+if (!class_exists('fs')) require __DIR__.'/user_modules/fs.php';
 
 class module_loader {
 	public $path_mods;
@@ -28,7 +29,10 @@ class module_loader {
 	 * @return void
 	 */
 	public function update_modules_config($modules){
-		$this->load_modules = $modules;
+		if ($this->load_modules != $modules)
+			$this->load_modules = array_merge($this->load_modules, $modules);
+		else
+			$this->load_modules = $modules;
 	}
 
 	public function get_module_list(){
@@ -70,7 +74,7 @@ class Config {
 		return false;
 	}
 
-	public function create_start_config($MyPHP, $mode = 'all'){
+	public function create($MyPHP, $mode = 'all'){
 		$config = [
 			'modules' => [],
 			'aliases' => [
@@ -121,6 +125,7 @@ class Config {
 		file_put_contents($MyPHP->conf_path, $j);
 	}
 }
+
 class MyPHP {
 	public $conf_path;
 	
@@ -133,10 +138,11 @@ class MyPHP {
 			throw new Exception('file is not jhp');
 		}
 	}
-
+	
+	# TODO: 2 раза вызывается модуль, А если глобально выключен - Один раз, разобраться...
 	function __construct(string $path){
 		start:
-		if (!file_exists(__DIR__.'/user_modules')) mkdir(__DIR__.'/user_modules');
+		fs::create_if_not_exist(fs::TYPE_DIR, __DIR__.'/user_modules');
 		$this->Logger = new Logger(__DIR__.'/log.txt');
 		$this->isJhp($path);
 		$this->setGlobalPath($path);
@@ -149,7 +155,7 @@ class MyPHP {
 			if (strlen($json) == 0) {
 				echo 'Заполняем конфиг' . PHP_EOL;
 				if ($conf_path != './jhp.config') $this->Logger->add("Заполняем конфиг '$conf_path'");
-				(new Config)->create_start_config($this, 'use');
+				(new Config)->create($this, 'use');
 				goto start;
 			} else {
 				if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");

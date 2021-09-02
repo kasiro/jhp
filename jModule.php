@@ -4,14 +4,21 @@ class jModule {
 	protected $settings = [];
 	protected $name;
 	public $regList = [];
+	public $actionIter = 0;
 
 	// function __construct(string $name){
 	// 	$this->name = $name;
 	// }
 
 	public function setName(string $name){
-		$this->name = $name;
+		$newName = $this->PrepareName($name);
+		$this->name = $newName;
 	}
+
+	public function PrepareName(string $path){
+		return explode('.', basename($path))[0];
+	}
+
 	public function getName(){
 		return $this->name;
 	}
@@ -22,6 +29,10 @@ class jModule {
 
 	public function getSettings(){
 		return $this->settings;
+	}
+
+	public function action($function){
+		return $function();
 	}
 
 	public function addreg(string $reg, string|callable $action){

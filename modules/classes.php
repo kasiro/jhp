@@ -4,7 +4,7 @@ $module = new jModule;
 $module->setSettings([
 	'use' => true
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $example = 'Class::__vnames()';
 $module->addreg('/(\w*)::(\w*)\(\)/m', function ($matches) {
 	$className = $matches[1];

@@ -4,7 +4,7 @@ $module = new jModule;
 $module->setSettings([
 	'use' => false
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $module->addreg('/if(\s*)\((.*)\)/m', function ($matches){
 	$if_in = $matches[2];
 	echo $if_in . PHP_EOL;

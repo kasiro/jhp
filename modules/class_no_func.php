@@ -5,7 +5,7 @@ $module->setSettings([
 	'use' => true,
 	'ots' => true
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 if (!function_exists('findType')) {
 	function findType($sym){
 		$ops = [

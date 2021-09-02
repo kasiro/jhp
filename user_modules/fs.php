@@ -1,6 +1,12 @@
 <?php
 
+use skrtdev\Telegram\Type;
+use Telegram\File;
+
 class fs {
+	const TYPE_FILE = 'file';
+	const TYPE_DIR = 'dir';
+
 	public static function folder_copy($from, $to, $black_list = []) { 
 		$dir = opendir($from);
 		@mkdir($to);
@@ -141,6 +147,17 @@ class fs {
 			return substr(strrchr($path, '.'), 1);
 		} else {
 			return false;
+		}
+	}
+
+	public static function create_if_not_exist(string $type = 'dir', string $path){
+		switch ($type){
+			case 'file':
+				if (!file_exists($path)) file_put_contents($path, '');
+				break;
+			case 'dir':
+				if (!file_exists($path)) mkdir($path);
+				break;
 		}
 	}
 }

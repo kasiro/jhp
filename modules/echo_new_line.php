@@ -6,6 +6,6 @@ $module = new jModule;
 $module->setSettings([
 	'use' => true
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $module->addreg('/nl (.*);/m', 'echo $1 . PHP_EOL;');
 return $module;

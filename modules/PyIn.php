@@ -5,7 +5,7 @@ $module->setSettings([
 	'use' => false,
 	'version' => 8
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $module->addreg('/if(\s*)\((.*)\)/m', function ($matches) use (&$module){
 	$settings = $module->getSettings();
 	$if_in = $matches[2];

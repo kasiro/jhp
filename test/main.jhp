@@ -9,9 +9,7 @@ $main = () => {
 	$hello();
 };
 $main();
-
 $bot->app(fn($message) use (&$bot) => {
 	
 });
-
 nl "hello \"{$name}\", im lisa";

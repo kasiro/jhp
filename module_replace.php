@@ -1,7 +1,7 @@
 <?php
 
-$what = '$n = explode(\'.\', basename(__FILE__))[0];'."\n".'$module->setName($n);';
-$to = '$module->setName(explode(\'.\', basename(__FILE__))[0]);';
+$what = '$module->setName(explode(\'.\', basename(__FILE__))[0]);';
+$to = '$module->setName(__FILE__);';
 $modules = glob(__DIR__ . '/modules/*.php');
 foreach ($modules as $module){
 	$text = file_get_contents($module);

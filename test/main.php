@@ -13,9 +13,7 @@ $main = function() use ($allvars) {
 	$hello();
 };
 $main();
-
 $bot->app(function ($message) use (&$bot) {
 	
 });
-
 echo "hello \"{$name}\", im lisa" . PHP_EOL;

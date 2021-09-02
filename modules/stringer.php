@@ -2,10 +2,10 @@
 
 $module = new jModule;
 $module->setSettings([
-	'use' => true,
+	'use' => false,
 	'desc' => '\"текст без $\" -> \'текст без $\''
 ]);
-$module->setName(explode('.', basename(__FILE__))[0]);
+$module->setName(__FILE__);
 $module->addreg(
 	'/(.*?)"(.*?[^\\\\])"/m',
 	function ($matches){
@@ -15,7 +15,7 @@ $module->addreg(
 			'\t'
 		];
 		if (strlen($matches[2]) == 0) return $matches[1]."'".$matches[2]."'";
-		if (!str_contains($matches[2], '$') && !str_contains($matches[1], 'import') ) {
+		if (!str_contains($matches[2], '$') && !str_contains($matches[2], 'import') ) {
 			if (str_contains($matches[2], "'")){
 				$matches[2] = preg_replace("/([^\\\\])\'/m", "$1\\'", $matches[2]);
 			}
