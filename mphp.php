@@ -74,14 +74,15 @@ class Config {
 		return false;
 	}
 
-	public function create($MyPHP, $mode = 'all'){
+	public function create($mode = 'all'){
+		$JHP = JHP::getInstance();
 		$config = [
 			'modules' => [],
 			'aliases' => [
 				'__con' => '__construct'
 			]
 		];
-		foreach ($MyPHP->module_loader->getModules() as $path){
+		foreach ($JHP->module_loader->getModules() as $path){
 			$current_module = require $path;
 			// $module_name = explode('.', basename($path))[0];
 			$module_name = $current_module->getName();
@@ -98,7 +99,7 @@ class Config {
 				}
 			}
 		}
-		foreach ($MyPHP->module_loader->load_larege_modules() as $path){
+		foreach ($JHP->module_loader->load_larege_modules() as $path){
 			// $module_name = basename(dirname($path));
 			$current_module = require $path;
 			$module_name = $current_module->getName();
@@ -119,22 +120,23 @@ class Config {
 					break;
 			}
 		}
-		$MyPHP->Logger->add("create_start_config mode is '$mode'");
+		$JHP->Logger->add("create_start_config mode is '$mode'");
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 		$j = str_replace('    ', "\t", $j);
-		file_put_contents($MyPHP->conf_path, $j);
+		file_put_contents($JHP->conf_path, $j);
 	}
 }
 
-class MyPHP {
+class JHP {
 	public $conf_path;
-	
+	protected static $_instance;
+
 	public function isJhp($path) {
 		if (explode('.', basename($path))[1] !== 'jhp') {
-			// Нереально из за \\.jhp (VS Code)
-			// $this->Logger = new Logger(__DIR__.'/log.txt');
-			// $this->Logger->add('file is not jhp');
-			// system('notify-send "JHP" "file is not jhp"');
+			// Нереально из за \\.jhp (VS Code) (Разве что если вручную)
+			$this->Logger = new Logger(__DIR__.'/log.txt');
+			$this->Logger->add('file is not jhp');
+			system('notify-send "JHP" "file is not jhp"');
 			throw new Exception('file is not jhp');
 		}
 	}
@@ -155,7 +157,7 @@ class MyPHP {
 			if (strlen($json) == 0) {
 				echo 'Заполняем конфиг' . PHP_EOL;
 				if ($conf_path != './jhp.config') $this->Logger->add("Заполняем конфиг '$conf_path'");
-				(new Config)->create($this, 'use');
+				(new Config)->create('use');
 				goto start;
 			} else {
 				if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
@@ -169,6 +171,16 @@ class MyPHP {
 		}
 		$this->renderCode();
 	}
+
+	public static function getInstance() {
+		if (self::$_instance === null) {
+			self::$_instance = new self;
+		}
+		return self::$_instance;
+	}
+ 
+	private function __clone() {}
+	public function __wakeup() {}
 
 	public function setGlobalPath($path){
 		$GLOBALS['fileinfo']['full'] = $path;
@@ -272,5 +284,5 @@ class MyPHP {
 }
 
 $p = @$argv[1];
-$mphp = new MyPHP($p);
+$mphp = new JHP($p);
 (new Logger(__DIR__ . '/log.txt'))->ot();
