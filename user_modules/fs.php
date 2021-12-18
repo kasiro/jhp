@@ -1,7 +1,5 @@
 <?php
 
-use skrtdev\Telegram\Type;
-use Telegram\File;
 
 class fs {
 	const TYPE_FILE = 'file';

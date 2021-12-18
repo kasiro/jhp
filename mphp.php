@@ -1,15 +1,23 @@
 <?php declare(strict_types=1);
 
-# 1 - Абсолютная проходимость - Абсолютная передача данных
-if (!class_exists('Logger')) require(__DIR__.'/com/logger.php');
+# 1 - Абсолютная проходимость - Абсолютная передача данных)
+
+require __DIR__.'/Storage.php';
 if (!class_exists('fs')) require __DIR__.'/user_modules/fs.php';
+if (!class_exists('Logger')) {
+	require __DIR__.'/com/Logger.php';
+	if (!class_exists('Logger')) echo 'class Logger not required!'.PHP_EOL;
+}
+Storage::set('Logger', function (){
+	return new Logger(__DIR__.'/log.txt');
+});
 
 class module_loader {
 	public $path_mods;
 	public $load_modules = [];
 
 	function __construct(string $path_mods){
-		$this->Logger = new Logger(__DIR__.'/log.txt');
+		$this->Logger = Storage::get('Logger');
 		if (!class_exists('jModule')) {
 			require __DIR__.'/jModule.php';
 		}
@@ -17,7 +25,9 @@ class module_loader {
 	}
 
 	public function load_larege_modules(){
-		$files = glob(__DIR__.'/larege_modules/*/index.php');
+		$files = array_merge(
+			glob(__DIR__.'/larege_modules/*/index.php')
+		);
 		foreach ($files as $file){
 			yield $file;
 		}
@@ -53,36 +63,40 @@ class module_loader {
 		}
 	}
 }
+
+Storage::set('module_loader', function (){
+	return new module_loader(__DIR__.'/modules/*.php');
+});
+
 class Config {
+	public static $config_name = '';
 
 	public static function find($file_path){
 		$arr = explode('/', dirname($file_path));
-		$dirPath =  dirname($file_path);
+		$DirPath = dirname($file_path);
 		for ($i = 0; $i < count($arr); $i++){
-			$cur_dir_up = $dirPath;
-			// echo $cur_dir_up . PHP_EOL;
+			$cur_dir_up = $DirPath;
 			$files = glob($cur_dir_up . '/*.config');
-			if (count($files) > 0) {
+			if (!empty($files)){
 				foreach ($files as $file){
-					if (basename($file) == 'jhp.config') {
+					if (basename($file) == 'jhp.config'){
 						return $file;
 					}
 				}
 			}
-			$dirPath = dirname($dirPath);
+			$DirPath = dirname($DirPath);
 		}
 		return false;
 	}
 
-	public function create($mode = 'all'){
-		$JHP = JHP::getInstance();
+	public static function create($conf_path, $mode = 'all'){
+		$Logger = Storage::get('Logger');
+		$module_loader = Storage::get('module_loader');
 		$config = [
 			'modules' => [],
-			'aliases' => [
-				'__con' => '__construct'
-			]
+			'aliases' => []
 		];
-		foreach ($JHP->module_loader->getModules() as $path){
+		foreach ($module_loader->getModules() as $path){
 			$current_module = require $path;
 			// $module_name = explode('.', basename($path))[0];
 			$module_name = $current_module->getName();
@@ -99,7 +113,7 @@ class Config {
 				}
 			}
 		}
-		foreach ($JHP->module_loader->load_larege_modules() as $path){
+		foreach ($module_loader->load_larege_modules() as $path){
 			// $module_name = basename(dirname($path));
 			$current_module = require $path;
 			$module_name = $current_module->getName();
@@ -120,10 +134,10 @@ class Config {
 					break;
 			}
 		}
-		$JHP->Logger->add("create_start_config mode is '$mode'");
+		$Logger->add("create_start_config mode is '$mode'");
 		$j = json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 		$j = str_replace('    ', "\t", $j);
-		file_put_contents($JHP->conf_path, $j);
+		file_put_contents($conf_path, $j);
 	}
 }
 
@@ -134,36 +148,31 @@ class JHP {
 	public function isJhp($path) {
 		if (explode('.', basename($path))[1] !== 'jhp') {
 			// Нереально из за \\.jhp (VS Code) (Разве что если вручную)
-			$this->Logger = new Logger(__DIR__.'/log.txt');
-			$this->Logger->add('file is not jhp');
+			Storage::get('Logger')->add('file is not jhp');
 			system('notify-send "JHP" "file is not jhp"');
 			throw new Exception('file is not jhp');
 		}
 	}
 	
-	# TODO: 2 раза вызывается модуль, А если глобально выключен - Один раз, разобраться...
+	# FIXME: 2 раза вызывается модуль, А если глобально выключен - Один раз, разобраться...
 	function __construct(string $path){
-		start:
 		fs::create_if_not_exist(fs::TYPE_DIR, __DIR__.'/user_modules');
-		$this->Logger = new Logger(__DIR__.'/log.txt');
+		$this->Logger = Storage::get('Logger');
 		$this->isJhp($path);
 		$this->setGlobalPath($path);
-		$this->module_loader = new module_loader(__DIR__.'/modules/*.php');
+		$this->module_loader = Storage::get('module_loader');
 		if ($conf_path = Config::find($path)) {
 			// echo $conf_path . PHP_EOL;
-			$this->conf_path = $conf_path;
-			$GLOBALS['conf_path'] = $conf_path;
+			$GLOBALS['conf_path'] = $this->conf_path = $conf_path;
 			$json = file_get_contents($this->conf_path);
 			if (strlen($json) == 0) {
 				echo 'Заполняем конфиг' . PHP_EOL;
 				if ($conf_path != './jhp.config') $this->Logger->add("Заполняем конфиг '$conf_path'");
-				(new Config)->create('use');
-				goto start;
+				Config::create($this->conf_path, 'use');
+				$json = file_get_contents($this->conf_path);
+				$this->elseHandler($json, $this->conf_path);
 			} else {
-				if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
-				echo 'Обрабатываем данные конфига' . PHP_EOL;
-				$config = json_decode($json, true);
-				$this->module_loader->update_modules_config($config['modules']);
+				$this->elseHandler($json, $this->conf_path);
 			}
 		} else {
 			$this->Logger->add('Конфиг не найден');
@@ -172,9 +181,16 @@ class JHP {
 		$this->renderCode();
 	}
 
-	public static function getInstance() {
+	public function elseHandler($json, $conf_path){
+		if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
+		echo 'Обрабатываем данные конфига' . PHP_EOL;
+		$config = json_decode($json, true);
+		$this->module_loader->update_modules_config($config['modules']);
+	}
+
+	public static function getInstance(...$args) {
 		if (self::$_instance === null) {
-			self::$_instance = new self;
+			self::$_instance = new self(...$args);
 		}
 		return self::$_instance;
 	}
@@ -285,4 +301,4 @@ class JHP {
 
 $p = @$argv[1];
 $mphp = new JHP($p);
-(new Logger(__DIR__ . '/log.txt'))->ot();
+Storage::get('Logger')->ot();

@@ -1,5 +1,7 @@
 <?php
 
+namespace user_modules;
+
 class Logger {
 	public $path;
 	public $CountLog = 0;

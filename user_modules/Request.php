@@ -1,5 +1,6 @@
 <?php
 
+
 class Request {
 	public static function get($url, $post = [], $data = false) {
 		$headers[] = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:17.0) Gecko/20100101 Firefox/17.0';

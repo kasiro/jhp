@@ -1,5 +1,6 @@
 <?php
 
+
 class general {
 	public $algo;
 	private $hash;

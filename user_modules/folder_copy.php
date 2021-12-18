@@ -2,6 +2,7 @@
 
 use ProgressBar\Manager;
 
+
 class folder_copy
 {
 	public static $i = 0;

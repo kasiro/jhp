@@ -1,5 +1,6 @@
 <?php
 
+
 // function str_contains($string, $find){
 //     if (strpos($string, $find) !== false) {
 //        	return true;

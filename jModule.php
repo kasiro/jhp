@@ -4,7 +4,6 @@ class jModule {
 	protected $settings = [];
 	protected $name;
 	public $regList = [];
-	public $actionIter = 0;
 
 	// function __construct(string $name){
 	// 	$this->name = $name;
@@ -39,7 +38,7 @@ class jModule {
 		if (!array_key_exists($reg, $this->regList)) {
 			$this->regList[$reg] = $action;
 		} else {
-			throw new Exception('regexp is aelredy in $regList');
+			throw new Exception('regexp is already in $regList');
 		}
 	}
 }

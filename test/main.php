@@ -1,5 +1,7 @@
 <?php
 
+require '/home/kasiro/Документы/projects/testphp/user_modules/fs.php';
+
 $name = 'Imya';
 $surname = 'Familya';
 $allvars = get_defined_vars();

@@ -4,7 +4,7 @@ date_default_timezone_set('Etc/GMT-7');
 
 class Logger {
 	private static $count = 0;
-
+	public $file = '';
 	function __construct($file){
 		if (file_exists($file)) {
 			$this->file = $file;

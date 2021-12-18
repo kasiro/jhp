@@ -3,7 +3,7 @@
 // if (!class_exists('jModule')) require $GLOBALS['jModule'];
 require dirname(__DIR__).'/Helper.php';
 
-if (!function_exists('leveling') && dirname(__DIR__, 2) != __DIR__ || dirname(__DIR__, 2) != dirname(__DIR__)){
+if (!function_exists('leveling')){
 	function leveling($path, $level = 0){
 		if ($path == './' || $path == '/') {
 			return __DIR__;

@@ -1,5 +1,7 @@
 <?php
 
+import 'fs';
+
 $name = 'Imya';
 $surname = 'Familya';
 $main = () => {

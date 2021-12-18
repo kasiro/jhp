@@ -206,8 +206,8 @@ class CODER_caesar_FULL
 
 class CODER_Number_FULL {
 	
-	public static $abc = '';
-	public static $abcNum = '';
+	public static $abc = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	public static $abcNum = '0123456789';
 	private static $offset = 5;
 
 	public static function NumEncode($text){

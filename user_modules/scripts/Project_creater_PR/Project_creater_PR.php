@@ -1,6 +1,7 @@
 <?php
 
 use ProgressBar\Manager;
+
 if (!function_exists('is_list')) {
 	function is_list($arr){
 		return array_values($arr) === $arr;

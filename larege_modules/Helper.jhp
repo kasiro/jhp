@@ -27,4 +27,31 @@ class JhpHelper {
 		}
 		return false;
 	}
+
+	public static getClassContent(array|string $path){
+		$code = file_get_contents($path);
+		if (is_string($path)){
+			$ClassContent = [];
+			$code = preg_replace_callback('/class\s*(\w+)\s*{(.*?\n)}/m', fn($matches) => {
+				$className = $matches[1];
+				$classContent = $matches[2];
+				$ClassContent[$className] = $classContent;
+				return $matches[0];
+			}, code);
+			return $ClassContent;
+		} elseif (is_array($path)){
+			$ClassContentFiles = [];
+			foreach ($path as $p){
+				$code = preg_replace_callback('/class\s*(\w+)\s*{(.*?\n)}/m', fn($matches) => {
+					$className = $matches[1];
+					$classContent = $matches[2];
+					$filename = explode('.', basename($p))[0];
+					$ClassContentFiles[$filename][$className] = $classContent;
+					return $matches[0];
+				}, code);
+			}
+			return $ClassContentFiles;
+		}
+		return false;
+	}
 }
