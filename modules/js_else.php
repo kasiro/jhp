@@ -25,7 +25,7 @@ if (!function_exists('ternarn_else')) {
 		if ($i == 0) $end_string .= $string;
 		$end_string = str_replace($hash, $end, $end_string);
 		$i++;
-		$end_string = ternarn_else($arr, $i, $end_string,  $hash, $mini);
+		$end_string = ternarn_else($arr, $i, $end_string, $hash, $mini);
 		return $end_string;
 	}
 }
@@ -36,7 +36,7 @@ $module->setSettings([
 	'mini' => false
 ]);
 $module->setName(__FILE__);
-$module->addreg('/^(\$.*) = (.*)(\|)(.*?);/m', function ($matches) use (&$module) {
+$module->addreg('/^(\$.*) = (.*)(\s\|\s)(.*?);/m', function ($matches) use (&$module) {
 	$settings = $module->getSettings();
 	$res = '';
 	for ($i = 2; $i < count($matches); $i++) {

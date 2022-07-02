@@ -8,12 +8,7 @@ $module->setSettings([
 $module->setName(__FILE__);
 if (!function_exists('findType')) {
 	function findType($sym){
-		$ops = [
-			'int',
-			'string',
-			'bool',
-			'array'
-		];
+		$ops = require __DIR__.'/types/types.php';
 		$find = false;
 		foreach ($ops as $el){
 			if (in_array($el, $sym)) {
@@ -33,7 +28,7 @@ if (!function_exists('findType')) {
 	}
 }
 $module->addreg(
-	'/^([^\n\/\/].*public|[^\n\/\/].*private|[^\n\/\/].*protected|)[[:>:]](.*)[[:<:]](.*)(\((.*)\)|\()/m',
+	'/^([^\n\/\/].*public|[^\n\/\/].*private|[^\n\/\/].*protected|)[[:>:]]([ \w]*)[[:<:]]([\w]+)(\((.*)\)|\()/m',
 	function ($matches) use (&$module) {
 		$sym = explode(' ', trim($matches[2]));
 		if (!str_contains($matches[1], '\'')){

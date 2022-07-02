@@ -59,8 +59,8 @@ class str {
 	 * Вывод/Результат: $str == 'my name jhon'
 	 */
 	public static function sprintf2($str, $vars, $char = '%'){
-		if(is_array($vars)){
-			foreach($vars as $k => $v){
+		if (is_array($vars)) {
+			foreach ($vars as $k => $v) {
 				$str = str_replace($char . $k, $v, $str);
 			}
 		}

@@ -4,8 +4,20 @@ date_default_timezone_set('Etc/GMT-7');
 
 class Logger {
 	private static $count = 0;
+	public static $countLines = 0;
 	public $file = '';
 	function __construct($file){
+		$handle = fopen($file, "r");
+		while(!feof($handle)){
+			$line = fgets($handle);
+			static::$countLines++;
+		}
+		fclose($handle);
+
+		if (static::$countLines > 50000){
+			file_put_contents($file, '');
+		}
+
 		if (file_exists($file)) {
 			$this->file = $file;
 		} else {

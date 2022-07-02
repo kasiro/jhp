@@ -1,0 +1,100 @@
+<?php
+
+class TagReader {
+	
+	public __construct($xml){
+		$->xml = $xml;
+	}
+
+	public findTag($name, $text = null){
+		if ($text == null){
+			$find = false;
+			preg_replace_callback('/<(\w+)>(.*)<\/\w+>/ms', fn($matches) use ($name, &$find) => {
+				$tagName = $matches[1];
+				if ($tagName == $name){
+					$find = $matches[2];
+				}
+				return $matches[0];
+			}, $->xml);
+			if (!$find){
+				preg_replace_callback('/<(\w+)>(.*)<\/\w+>/m', fn($matches) use ($name, &$find) => {
+					$tagName = $matches[1];
+					if ($tagName == $name){
+						$find = $matches[2];
+					}
+					return $matches[0];
+				}, $->xml);
+			}
+		} else {
+			$find = false;
+			preg_replace_callback('/<(\w+)>(.*)<\/\w+>/ms', fn($matches) use ($name, &$find) => {
+				$tagName = $matches[1];
+				if ($tagName == $name){
+					$find = $matches[2];
+				}
+				return $matches[0];
+			}, $text);
+			if (!$find){
+				preg_replace_callback('/<(\w+)>(.*)<\/\w+>/m', fn($matches) use ($name, &$find) => {
+					$tagName = $matches[1];
+					if ($tagName == $name){
+						$find = $matches[2];
+					}
+					return $matches[0];
+				}, $text);
+			}
+		}
+		return $find;
+		return false;
+	}
+
+	public getTag($search, $text = null){
+		if ($text == null){
+			if (str_contains($search, '>')){
+				$els = explode('>', $search);
+				$lel = false;
+				foreach ($els as $el){
+					if (!$lel){
+						$lel = $->findTag($el);
+					} else {
+						$lel = $->findTag($lel);
+					}
+				}
+			} else {
+				return $->findTag($search);
+			}
+		} else {
+			if (str_contains($search, '>')){
+				$els = explode('>', $search);
+				$lel = false;
+				foreach ($els as $el){
+					if (!$lel){
+						$lel = $->findTag($el, $text);
+					} else {
+						$lel = $->findTag($lel, $text);
+					}
+				}
+			} else {
+				return $->findTag($search, $text);
+			}
+		}
+		
+	}
+
+	public getTagAll($search, $text = null){
+		if ($text == null){
+			if (str_contains($search, '>')){
+
+			} else {
+				
+			}
+		} else {
+			if (str_contains($search, '>')){
+
+			} else {
+				return $->findTag($search);
+			}
+		}
+	}
+
+}

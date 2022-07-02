@@ -2,7 +2,7 @@
 
 $module = new jModule;
 $module->setSettings([
-	'use' => true
+	'use' => false
 ]);
 $module->setName(__FILE__);
 $example = 'Class::__vnames()';

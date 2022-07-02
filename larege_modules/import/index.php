@@ -132,7 +132,6 @@ $module->addreg('/(.*)import: include \'(.*)\';/m', function ($matches) use ($mo
 	$mp = FILE_REQ;
 	# Название файла
 	$paths = $matches[2];
-	$s = '';
 	$modules = [];
 	$s = '';
 	# Директория файла

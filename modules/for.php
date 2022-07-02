@@ -5,8 +5,8 @@ $module->setSettings([
 	'use' => true
 ]);
 $module->setName(__FILE__);
-$module->addreg('/return\s+([^\r\n;]+[^;\r\n[({])$/m', function ($m){
-	return $m[0].';';
+$example = 'for $arr as $el {}';
+$module->addreg('/for ([^(\()].*[^(\))]*) {/m', function ($matches) {
+	return 'for ('.$matches[1].') {';
 });
-$module->addreg('/return$/m', 'return;');
 return $module;

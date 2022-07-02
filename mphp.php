@@ -3,6 +3,8 @@
 # 1 - Абсолютная проходимость - Абсолютная передача данных)
 
 require __DIR__.'/Storage.php';
+require __DIR__.'/user_modules/Colors.php';
+require __DIR__.'/user_modules/str.php';
 if (!class_exists('fs')) require __DIR__.'/user_modules/fs.php';
 if (!class_exists('Logger')) {
 	require __DIR__.'/com/Logger.php';
@@ -38,7 +40,7 @@ class module_loader {
 	 *
 	 * @return void
 	 */
-	public function update_modules_config($modules){
+	public function update_modules_config(Countable|array $modules){
 		if ($this->load_modules != $modules)
 			$this->load_modules = array_merge($this->load_modules, $modules);
 		else
@@ -143,6 +145,8 @@ class Config {
 
 class JHP {
 	public $conf_path;
+	public module_loader $module_loader;
+	public Logger $Logger;
 	protected static $_instance;
 
 	public function isJhp($path) {
@@ -160,6 +164,7 @@ class JHP {
 		$this->Logger = Storage::get('Logger');
 		$this->isJhp($path);
 		$this->setGlobalPath($path);
+		// $this->copy_to_env($path);
 		$this->module_loader = Storage::get('module_loader');
 		if ($conf_path = Config::find($path)) {
 			// echo $conf_path . PHP_EOL;
@@ -176,16 +181,23 @@ class JHP {
 			}
 		} else {
 			$this->Logger->add('Конфиг не найден');
-			echo 'Конфиг не найден' . PHP_EOL;
+			echo Colors::setColor('Конфиг не найден', 'red')  . PHP_EOL;
 		}
 		$this->renderCode();
+		// fs::clean(__DIR__.'/env');
 	}
 
 	public function elseHandler($json, $conf_path){
-		if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
-		echo 'Обрабатываем данные конфига' . PHP_EOL;
-		$config = json_decode($json, true);
-		$this->module_loader->update_modules_config($config['modules']);
+		if (json_decode($json, true) != null){
+			if ($conf_path != './jhp.config') $this->Logger->add("Обрабатываем данные конфига '$conf_path'");
+			// echo 'Обрабатываем данные конфига: "'. $conf_path . '"' . PHP_EOL;
+			echo 'Обрабатываем данные конфига: "'. Colors::setColor($conf_path, 'green') . '"'  . PHP_EOL;
+			// $this->copy_to_env($conf_path);
+			$config = json_decode($json, true);
+			$this->module_loader->update_modules_config($config['modules']);
+		} else {
+			throw new Exception('Error parse json, json IS NULL');
+		}
 	}
 
 	public static function getInstance(...$args) {
@@ -198,26 +210,141 @@ class JHP {
 	private function __clone() {}
 	public function __wakeup() {}
 
+	public function copy_to_env($path){
+		$ext = fs::ext($path);
+		if ($ext == 'jhp' || $ext == 'config'){
+			copy($path, __DIR__.'/env/'.basename($path));
+			$this->Logger->add('файл '.$ext.' перемешён в env для его дальней обработки');
+		} else {
+			$this->Logger->add('Неизвестный тип файла');
+			throw new Exception('Неизвестный тип файла: ' . $ext);
+		}
+	}
+
+	public function copy_out_env($path){
+		$ext = fs::ext($path);
+		if ($ext == 'php'){
+			copy(__DIR__.'/env/'.basename($path), $path);
+		} else {
+			$this->Logger->add('Неизвестный тип файла');
+			throw new Exception('Неизвестный тип файла: ' . $ext);
+		}
+	}
+
 	public function setGlobalPath($path){
 		$GLOBALS['fileinfo']['full'] = $path;
 		$GLOBALS['fileinfo']['dirname'] = dirname($path);
 		$GLOBALS['fileinfo']['basename'] = basename($path);
 		$newpath = preg_replace('#\.[\w\d]+$#i', '.php', basename($path));
 		$GLOBALS['fileinfo']['savefull'] = dirname($path).'/'.$newpath;
+		$GLOBALS['fileinfo']['testpath'] = __DIR__.'/test/'.basename($path);
+		$GLOBALS['fileinfo']['testsave'] = __DIR__.'/test/'.fs::nameNoExt($path).'.php';
 		foreach ($GLOBALS['fileinfo'] as $fname => $p){
 			$this->Logger->add("file $fname path is '$p'");
 		}
 	}
 
-	public function transform($module, $code){
+	private function doHandle($newCode, $code, jModule $module, array $repColors, array $repVars, $pattern, array &$args){
+		$args['newCode'] = $newCode;
+		if (strlen($newCode) > strlen($code)) {
+			$pattern = '%module_name: %editable (%code -> %newCode)';
+			$repVars['editable'] = '%handled';
+			$repVars['code'] = strlen($code);
+			$repColors[strlen($newCode)] = 'green';
+			$repVars['newCode'] = '%'.strlen($newCode);
+			$args['repVars'] = $repVars;
+			$args['repColors'] = $repColors;
+			$args['pattern'] = $pattern;
+		} else {
+			$pattern = '%module_name: %editable';
+			$repVars['editable'] = '%not %found';
+			$repVars['code'] = strlen($code);
+			$repColors[$module->getName()] = 'red';
+			$repColors[strlen($newCode)] = 'red';
+			$repVars['newCode'] = '%'.strlen($newCode);
+			$args['repVars'] = $repVars;
+			$args['repColors'] = $repColors;
+			$args['pattern'] = $pattern;
+		}
+	}
+
+	private function handle($newCode, $code, jModule $module, &$last, array $repColors, array $repVars, $pattern){
+		if ($newCode !== $code && $module->getName() !== $last && preg_last_error_msg() === 'No error'){
+			$string = str::sprintf2($pattern, $repVars);
+			echo Colors::colorize($string, $repColors) . PHP_EOL;
+			return $newCode;
+		} else if ($newCode === $code && $module->getName() !== $last) {
+			if (preg_last_error_msg() != 'No error'){
+				echo Colors::setColor($module->getName(), 'red') . ': ';
+				echo preg_last_error_msg() . PHP_EOL;
+			} else {
+				$string = str::sprintf2($pattern, $repVars);
+				echo Colors::colorize($string, $repColors) . PHP_EOL;
+				// echo PHP_EOL;
+			}
+			// echo $module->getName() .' !== '. $last . PHP_EOL;
+		}
+		$last = $module->getName();
+		return false;
+	}
+
+	public function transform(jModule $module, string $code){
+		$last = 'last';
+		$newCode = $code;
+		$result = false;
+		Colors::SetUpColors();
+		$repColors = [
+			$module->getName() => 'green',
+			// strlen($code) => 'blue',
+			strlen($newCode) => 'green',
+			'handled' => 'light_blue',
+			'not' => 'red',
+			'found' => 'red'
+		];
+		$repVars = [
+			'module_name' => '%'.$module->getName(),
+			'code' => strlen($code),
+			'newCode' => '%'.strlen($newCode)
+		];
+		$pattern = '%module_name: %editable (%code -> %newCode)';
+		$args = [
+			'newCode' => '',
+			'code' => $code,
+			'module' => $module,
+			'last' => &$last,
+			'repColors' => $repColors,
+			'repVars' => $repVars,
+			'pattern' => $pattern
+		];
+		//!FIXME: regList  не полностью проходит из за return
 		foreach ($module->regList as $reg => $act){
 			switch (gettype($act)) {
 				case 'string':
-					$code = preg_replace($reg, $act, $code);
+					$module_settings = $module->getSettings();
+					if (isset($module_settings['force']) && $module_settings['force'] === true){
+						$code = preg_replace($reg, $act, $code);
+						break;
+					}
+					$newCode = preg_replace($reg, $act, $code);
+					$this->doHandle($newCode, $code, $module, $repColors, $repVars, $pattern, $args);
+					$result = $this->handle(...$args);
+					if ($result !== false){
+						$code = $newCode;
+					}
 					break;
 
-				case 'object': // function
-					$code = preg_replace_callback($reg, $act, $code);
+				case 'object': //* function
+					$module_settings = $module->getSettings();
+					if (isset($module_settings['force']) && $module_settings['force'] === true){
+						$code = preg_replace_callback($reg, $act, $code);
+						break;
+					}
+					$newCode = preg_replace_callback($reg, $act, $code);
+					$this->doHandle($newCode, $code, $module, $repColors, $repVars, $pattern, $args);
+					$result = $this->handle(...$args);
+					if ($result !== false){
+						$code = $newCode;
+					}
 					break;
 				
 				default:
@@ -226,7 +353,8 @@ class JHP {
 					break;
 			}
 		}
-		return $code;
+		if ($result !== false) return $code;
+		else return $newCode;
 	}
 
 	public function module_list(){
@@ -279,12 +407,14 @@ class JHP {
 				}
 			}
 			if ($module->getSettings()['use'] === true){
+				// echo $module->getName() . PHP_EOL;
 				$module_type = basename($file) == 'index.php' ? 'large' : 'module';
 				if ($module_type == 'large') $this->Logger->add("load large module: '$name'");
 				else $this->Logger->add("load module: '$name'");
 				// print_r([
 				// 	$module->getName() => $module->getSettings()
 				// ]);
+				
 				$code = $this->transform($module, $code);
 			}
 		}

@@ -23,3 +23,21 @@ if (!function_exists('str_contains')) {
 		return false;
 	}
 }
+
+if (!function_exists('newenv')) {
+	function newenv(string $filepath){
+		list($dir, $filename) = [dirname($filepath), basename($filepath)];
+		$files = scandir($dir);
+		$data = array_diff($files, ['.', '..']);
+		$newData = $dir.'/'.[...array_filter($data, function ($e) use ($dir, $filename) {
+			if ($e == $filename){
+				return $dir.'/'.$e;
+			}
+		})][0];
+		putenv(
+			file_get_contents(
+				$newData
+			)
+		);
+	}
+}

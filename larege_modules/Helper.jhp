@@ -2,56 +2,58 @@
 
 require __DIR__.'/import/func.php';
 
-class JhpHelper {
-	public static getImportModules(array|string $path){
-		$modules = [];
-		$getMod = ($path) => {
-			$text = file_get_contents($path);
-			preg_replace_callback('/(.*)import: include \'(.*)\';/m', fn($matches) use (&$modules) => {
-				$modules[] = $matches[2];
-			}, $text);
-			preg_replace_callback('/(\t*|\s*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', fn($matches) use (&$modules) => {
-				foreach (import_array($matches[2]) as $module){
-					$modules[] = $module;
+if (!class_exists('JhpHelper')){
+	class JhpHelper {
+		public static getImportModules(array|string $path){
+			$modules = [];
+			$getMod = ($path) => {
+				$text = file_get_contents($path);
+				preg_replace_callback('/(.*)import: include \'(.*)\';/m', fn($matches) use (&$modules) => {
+					$modules[] = $matches[2];
+				}, $text);
+				preg_replace_callback('/(\t*|\s*)import_array: include \[((?:(?(R)\w++|[^]]*+)|(?R))*)\];/m', fn($matches) use (&$modules) => {
+					foreach (import_array($matches[2]) as $module){
+						$modules[] = $module;
+					}
+				}, $text);
+				return $modules
+			};
+			if (is_string($path)){
+				return $getMod($path);
+			} elseif (is_array($path)){
+				foreach ($path as $file_path){
+					$modules = array_merge($modules, $getMod($path));
 				}
-			}, $text);
-			return $modules;
-		};
-		if (is_string($path)){
-			return $getMod($path);
-		} elseif (is_array($path)){
-			foreach ($path as $file_path){
-				$modules = array_merge($modules, $getMod($path));
+				return $modules
 			}
-			return $modules;
+			return false
 		}
-		return false;
-	}
-
-	public static getClassContent(array|string $path){
-		$code = file_get_contents($path);
-		if (is_string($path)){
-			$ClassContent = [];
-			$code = preg_replace_callback('/class\s*(\w+)\s*{(.*?\n)}/m', fn($matches) => {
-				$className = $matches[1];
-				$classContent = $matches[2];
-				$ClassContent[$className] = $classContent;
-				return $matches[0];
-			}, code);
-			return $ClassContent;
-		} elseif (is_array($path)){
-			$ClassContentFiles = [];
-			foreach ($path as $p){
+	
+		public static getClassContent(array|string $path){
+			$code = file_get_contents($path);
+			if (is_string($path)){
+				$ClassContent = [];
 				$code = preg_replace_callback('/class\s*(\w+)\s*{(.*?\n)}/m', fn($matches) => {
 					$className = $matches[1];
 					$classContent = $matches[2];
-					$filename = explode('.', basename($p))[0];
-					$ClassContentFiles[$filename][$className] = $classContent;
+					$ClassContent[$className] = $classContent;
 					return $matches[0];
 				}, code);
+				return $ClassContent
+			} elseif (is_array($path)){
+				$ClassContentFiles = [];
+				foreach ($path as $p){
+					$code = preg_replace_callback('/class\s*(\w+)\s*{(.*?\n)}/m', fn($matches) => {
+						$className = $matches[1];
+						$classContent = $matches[2];
+						$filename = explode('.', basename($p))[0];
+						$ClassContentFiles[$filename][$className] = $classContent;
+						return $matches[0];
+					}, code);
+				}
+				return $ClassContentFiles
 			}
-			return $ClassContentFiles;
+			return false
 		}
-		return false;
 	}
 }

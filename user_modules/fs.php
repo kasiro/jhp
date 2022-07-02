@@ -1,5 +1,6 @@
 <?php
 
+if (!class_exists('Colors')) require __DIR__.'/Colors.php';
 
 class fs {
 	const TYPE_FILE = 'file';
@@ -50,7 +51,7 @@ class fs {
 						return $npath;
 					}
 				} else {
-					echo 'ERROR: $level > count(explode($sep, $path))' . "\n";
+					echo Colors::colorize('%ERROR: $level > count(explode($sep, $path))', ['ERROR' => 'red']) . "\n";
 				}
 			} else {
 				return $path;
@@ -110,12 +111,20 @@ class fs {
 				if ($file->isDir()) {
 					if (!in_array(basename($file), $black_list)){
 						rmdir($file);
-						echo 'folder: ' . basename($file) . ' deleted...' . "\n";
+						echo Colors::colorize('%folder: %' . basename($file) . ' %deleted...', [
+							'folder' => 'blue',
+							basename($file) => 'green',
+							'deleted' => 'red'
+						]) . "\n";
 					}
 				} else {
 					if (!in_array(basename($file), $black_list)) {
 						unlink($file);
-						echo 'file: ' . basename($file) . ' deleted...' . "\n";
+						echo Colors::colorize('%file: %' . basename($file) . ' %deleted...', [
+							'file' => 'blue',
+							basename($file) => 'green',
+							'deleted' => 'red'
+						]). "\n";
 					}
 				}
 			}
