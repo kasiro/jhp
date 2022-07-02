@@ -1,1 +1,5 @@
 user_modules/*
+log.txt
+./log.txt
+*.txt
+/vendor/
